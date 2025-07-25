@@ -1,0 +1,68 @@
+{
+  "phases": {
+    "phase1": {
+      "database": {
+        "passed": 24,
+        "failed": 3,
+        "details": "Database tests completed",
+        "success": true
+      },
+      "apiEndpoints": {
+        "passed": 24,
+        "failed": 48,
+        "details": "API endpoint tests had issues",
+        "success": false
+      },
+      "security": {
+        "passed": 0,
+        "failed": 0,
+        "details": ""
+      }
+    },
+    "phase2": {
+      "frontendBackend": {
+        "passed": 0,
+        "failed": 1,
+        "details": "Integration issues detected",
+        "success": false
+      },
+      "unitTests": {
+        "passed": 0,
+        "failed": 1,
+        "details": "Unit test failures detected",
+        "success": false
+      }
+    },
+    "phase3": {
+      "e2eTests": {
+        "passed": 0,
+        "failed": 1,
+        "details": "Command timeout after 300000ms: npm run test:e2e",
+        "success": false
+      },
+      "crossBrowser": {
+        "passed": 0,
+        "failed": 0,
+        "details": ""
+      }
+    },
+    "phase4": {
+      "loadTest": {
+        "passed": 0,
+        "failed": 1,
+        "details": "Performance issues detected",
+        "success": false
+      },
+      "lighthouse": {
+        "passed": 0,
+        "failed": 0,
+        "details": ""
+      }
+    }
+  },
+  "totalTests": 0,
+  "totalPassed": 0,
+  "totalFailed": 0,
+  "startTime": 1753191467637,
+  "endTime": 1753191790754
+}

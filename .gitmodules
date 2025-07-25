@@ -1,0 +1,6 @@
+[submodule "founders-day-admin"]
+	path = founders-day-admin
+	url = ./founders-day-admin
+[submodule "founders-day-frontend"]
+	path = founders-day-frontend
+	url = ./founders-day-frontend
