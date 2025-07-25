@@ -1,0 +1,15 @@
+{
+  "name": "founders-day-monorepo",
+  "private": true,
+  "workspaces": [
+    "founders-day-admin",
+    "founders-day-frontend", 
+    "shared-types"
+  ],
+  "dependencies": {
+    "@next/swc-darwin-arm64": "^15.4.4"
+  },
+  "scripts": {
+    "typecheck": "npm run typecheck --workspaces"
+  }
+}

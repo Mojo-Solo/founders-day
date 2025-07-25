@@ -1,0 +1,13 @@
+{
+  "name": "@founders-day/shared-types",
+  "version": "1.0.0",
+  "description": "Shared TypeScript types for Founders Day applications",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
