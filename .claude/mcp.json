@@ -1,0 +1,71 @@
+{
+  "mcpServers": {
+    "neon": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@neondatabase/mcp-server-neon",
+        "start",
+        "${{ secrets.NEON_API_KEY }}"
+      ],
+      "description": "Neon Postgres MCP server for natural language DB operations"
+    },
+    "serena": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena-mcp-server"
+      ],
+      "description": "Semantic code analysis and retrieval toolkit"
+    },
+    "consult7": {
+      "command": "uvx",
+      "args": [
+        "consult7",
+        "openrouter",
+        "${{ secrets.CONSULT7_API_KEY }}"
+      ],
+      "description": "Large codebase consultation via secondary LLMs"
+    },
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ],
+      "description": "Up-to-date documentation and context retrieval"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest",
+        "--browser",
+        "chrome",
+        "--headless"
+      ],
+      "description": "Browser automation and web scraping"
+    },
+    "desktop-commander": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@wonderwhy-er/desktop-commander"
+      ],
+      "description": "Terminal and file system operations"
+    }
+  },
+  "configuration": {
+    "github_secrets": [
+      "NEON_API_KEY",
+      "CONSULT7_API_KEY",
+      "ROVO_API_KEY"
+    ],
+    "notes": {
+      "neon_remote_preview": "For OAuth-based remote access (limited to personal accounts), use: {\"command\": \"npx\", \"args\": [\"-y\", \"mcp-remote\", \"https://mcp.neon.tech/mcp\"]}",
+      "bmad_setup": "BMAD doesn't have direct MCP; integrate via custom slash commands",
+      "revo_setup": "Revo is from Atlassian, download from atlassian.com/software/rovo/dev-cli",
+      "indydev_setup": "Clone from github.com/disler/indydevtools and integrate programmatically"
+    }
+  }
+}
