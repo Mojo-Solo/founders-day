@@ -3,13 +3,27 @@
   "private": true,
   "workspaces": [
     "founders-day-admin",
-    "founders-day-frontend", 
+    "founders-day-frontend",
     "shared-types"
   ],
   "dependencies": {
     "@next/swc-darwin-arm64": "^15.4.4"
   },
   "scripts": {
-    "typecheck": "npm run typecheck --workspaces"
+    "typecheck": "npm run typecheck --workspaces",
+    "test:cucumber": "cucumber-js",
+    "test:cucumber:watch": "cucumber-js --watch",
+    "test:cucumber:smoke": "cucumber-js --tags @smoke",
+    "test:cucumber:report": "cucumber-js --format html:reports/cucumber-report.html"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "^10.9.0",
+    "@cucumber/pretty-formatter": "^1.0.1",
+    "@types/chai": "^5.2.2",
+    "@types/cucumber": "^7.0.3",
+    "chai": "^5.2.1",
+    "cucumber-tsflow": "^4.5.2",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0"
   }
 }
