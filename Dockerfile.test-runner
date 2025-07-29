@@ -1,0 +1,42 @@
+# Test runner Dockerfile
+FROM node:18-alpine
+
+# Install dependencies for Playwright
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    freetype-dev \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont \
+    nodejs \
+    yarn
+
+# Tell Playwright to use installed Chromium
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=true
+ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY yarn.lock ./
+
+# Install dependencies
+RUN yarn install --frozen-lockfile
+
+# Copy test files
+COPY cucumber.js ./
+COPY features ./features
+COPY tsconfig.json ./
+
+# Create directories for reports and screenshots
+RUN mkdir -p reports screenshots
+
+# Set up non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nodejs -u 1001
+USER nodejs
+
+CMD ["npm", "run", "test:bdd"]

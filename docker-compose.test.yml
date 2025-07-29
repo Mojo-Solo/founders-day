@@ -1,0 +1,101 @@
+version: '3.8'
+
+services:
+  # Frontend application
+  frontend:
+    build: 
+      context: ./founders-day-frontend
+      dockerfile: Dockerfile.test
+    environment:
+      - NODE_ENV=test
+      - NEXT_PUBLIC_API_URL=http://admin:3001
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - test-network
+
+  # Admin application  
+  admin:
+    build:
+      context: ./founders-day-admin
+      dockerfile: Dockerfile.test
+    environment:
+      - NODE_ENV=test
+      - DATABASE_URL=postgresql://test:test@test-db:5432/founders_test
+      - JWT_SECRET=test-secret-key
+    ports:
+      - "3001:3001"
+    depends_on:
+      test-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - test-network
+
+  # Test database
+  test-db:
+    image: postgres:14-alpine
+    environment:
+      - POSTGRES_DB=founders_test
+      - POSTGRES_USER=test
+      - POSTGRES_PASSWORD=test
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./test-data/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./test-data/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test -d founders_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - test-network
+
+  # BDD test runner
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile.test-runner
+    depends_on:
+      frontend:
+        condition: service_healthy
+      admin:
+        condition: service_healthy
+      test-db:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=test
+      - FRONTEND_URL=http://frontend:3000
+      - ADMIN_URL=http://admin:3001
+      - DATABASE_URL=postgresql://test:test@test-db:5432/founders_test
+      - HEADLESS=true
+    volumes:
+      - ./features:/app/features
+      - ./reports:/app/reports
+      - ./screenshots:/app/screenshots
+    command: >
+      sh -c "
+        echo 'Waiting for services to be ready...' &&
+        sleep 10 &&
+        echo 'Running BDD tests...' &&
+        npm run test:bdd:docker
+      "
+    networks:
+      - test-network
+
+networks:
+  test-network:
+    driver: bridge
+
+volumes:
+  test-db-data:

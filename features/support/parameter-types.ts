@@ -1,39 +1,22 @@
 import { defineParameterType } from '@cucumber/cucumber';
 
-// Define custom parameter types for better readability in step definitions
-
-defineParameterType({
-  name: 'role',
-  regexp: /admin|volunteer|attendee|sponsor/,
-  transformer: (role: string) => role
-});
-
-defineParameterType({
-  name: 'ticketType',
-  regexp: /individual|group|vip|sponsor/,
-  transformer: (type: string) => type
-});
-
-defineParameterType({
-  name: 'paymentMethod',
-  regexp: /card|cash|check|online/,
-  transformer: (method: string) => method
-});
-
-defineParameterType({
-  name: 'eventName',
-  regexp: /"([^"]*)"/,
-  transformer: (name: string) => name
-});
-
+// Define parameter type for dollar amounts like $75, $65.00
 defineParameterType({
   name: 'amount',
-  regexp: /\$?(\d+(?:\.\d{2})?)/,
-  transformer: (amount: string) => parseFloat(amount.replace('$', ''))
+  regexp: /\$\d+(?:\.\d{2})?/,
+  transformer: (s: string) => parseFloat(s.replace('$', ''))
 });
 
+// Define parameter type for ticket types
 defineParameterType({
-  name: 'email',
-  regexp: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/,
-  transformer: (email: string) => email.toLowerCase()
+  name: 'ticketType',
+  regexp: /individual|couple|table/,
+  transformer: (s: string) => s
+});
+
+// Define parameter type for event names
+defineParameterType({
+  name: 'eventName',
+  regexp: /[A-Z][a-z]+(?: [A-Z][a-z]+)*/,
+  transformer: (s: string) => s
 });

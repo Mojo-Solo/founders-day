@@ -1,0 +1,216 @@
+name: BDD Tests
+
+on:
+  push:
+    branches: [ main, develop, feature/* ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20.x'
+  NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+jobs:
+  test-setup:
+    name: Test Setup Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run setup tests
+        run: npm run test:cucumber -- features/test-setup.feature
+        
+  bdd-tests:
+    name: BDD Feature Tests
+    needs: test-setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        feature-set:
+          - name: "Authentication"
+            files: "features/user-registration.feature"
+            tags: "@smoke"
+          - name: "Registration"
+            files: "features/registration/*.feature"
+            tags: "@registration"
+          - name: "Profile"
+            files: "features/profile-management.feature"
+            tags: "@profile"
+          - name: "Navigation"
+            files: "features/navigation.feature"
+            tags: "@navigation"
+          - name: "Search"
+            files: "features/search-functionality.feature"
+            tags: "@search"
+          - name: "Events"
+            files: "features/event-management.feature"
+            tags: "@events"
+            
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+        
+      - name: Build shared packages
+        run: |
+          npm run build --workspace=shared-types
+          npm run build --workspace=@founders-day/test-utils
+          
+      - name: Run ${{ matrix.feature-set.name }} tests
+        run: |
+          npm run test:cucumber -- \
+            ${{ matrix.feature-set.files }} \
+            --tags "${{ matrix.feature-set.tags }}" \
+            --format json:reports/cucumber-${{ matrix.feature-set.name }}.json \
+            --format html:reports/cucumber-${{ matrix.feature-set.name }}.html
+            
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cucumber-reports-${{ matrix.feature-set.name }}
+          path: reports/
+          retention-days: 30
+          
+      - name: Upload screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-screenshots-${{ matrix.feature-set.name }}
+          path: screenshots/
+          retention-days: 7
+          
+  bdd-parallel-tests:
+    name: BDD Parallel Execution Tests
+    needs: test-setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        worker: [1, 2, 3, 4]
+        
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+        
+      - name: Run parallel tests (Worker ${{ matrix.worker }})
+        run: |
+          npm run test:cucumber:parallel -- \
+            --shard=${{ matrix.worker }}/4 \
+            --format json:reports/cucumber-parallel-${{ matrix.worker }}.json
+            
+      - name: Upload parallel test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cucumber-parallel-reports-${{ matrix.worker }}
+          path: reports/
+          retention-days: 30
+          
+  test-report:
+    name: Generate Test Report
+    needs: [bdd-tests, bdd-parallel-tests]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-reports/
+          
+      - name: Merge test reports
+        run: |
+          npm install -g @cucumber/cucumber @cucumber/html-formatter
+          mkdir -p merged-reports
+          find all-reports -name "*.json" -exec cp {} merged-reports/ \;
+          npx cucumber-merge-reports merged-reports/*.json -o final-report.json
+          npx cucumber-html-formatter -i final-report.json -o final-report.html
+          
+      - name: Upload final report
+        uses: actions/upload-artifact@v4
+        with:
+          name: final-cucumber-report
+          path: |
+            final-report.json
+            final-report.html
+          retention-days: 30
+          
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('final-report.json', 'utf8'));
+            const stats = report.reduce((acc, feature) => {
+              feature.elements.forEach(scenario => {
+                scenario.steps.forEach(step => {
+                  if (step.result.status === 'passed') acc.passed++;
+                  else if (step.result.status === 'failed') acc.failed++;
+                  else if (step.result.status === 'skipped') acc.skipped++;
+                });
+              });
+              return acc;
+            }, { passed: 0, failed: 0, skipped: 0 });
+            
+            const comment = `## 🥒 Cucumber Test Results
+            
+            | Status | Count |
+            |--------|-------|
+            | ✅ Passed | ${stats.passed} |
+            | ❌ Failed | ${stats.failed} |
+            | ⏭️ Skipped | ${stats.skipped} |
+            
+            [View Full Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
