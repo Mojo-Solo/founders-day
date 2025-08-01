@@ -1,4 +1,3 @@
 packages:
-  - 'founders-day-admin'
-  - 'founders-day-frontend'
-  - 'shared-types'
+  - 'apps/*'
+  - 'packages/*'

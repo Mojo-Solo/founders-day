@@ -1,0 +1,1045 @@
+
+> founders-day-frontend@0.1.0 dev
+> next dev --turbopack
+
+   ▲ Next.js 15.3.3 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://127.94.0.1:3000
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 1637ms
+ ○ Compiling / ...
+ ✓ Compiled / in 4.5s
+ GET / 200 in 4824ms
+ GET / 200 in 418ms
+ ⚠ The "images.domains" configuration is deprecated. Please use "images.remotePatterns" configuration instead.
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 1541ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 1831ms
+ GET / 200 in 173ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 351ms
+ ○ Compiling /_not-found/page ...
+ ✓ Compiled /_not-found/page in 1527ms
+ GET /Users/david/Herd/node_modules/playwright/lib/index.js 404 in 1656ms
+ GET /Users/david/Herd/pivotal-advisors/tests/theme-testing.spec.ts 404 in 161ms
+ GET /Users/david/Herd/node_modules/playwright/lib/index.js 404 in 87ms
+ GET /Users/david/Herd/pivotal-advisors/tests/theme-testing.spec.ts 404 in 123ms
+ GET / 200 in 585ms
+ GET / 200 in 129ms
+ GET / 200 in 125ms
+ GET / 200 in 662ms
+ GET / 200 in 664ms
+ GET / 200 in 670ms
+ GET / 200 in 708ms
+ GET / 200 in 760ms
+ ○ Compiling /register ...
+ GET / 200 in 95ms
+ GET / 200 in 259ms
+ GET /register 200 in 6261ms
+ ⨯ ./app/schedule/page.tsx:7:1
+Export getEventSchedule doesn't exist in target module
+[0m [90m  5 |[39m [36mimport[39m { [33mCard[39m[33m,[39m [33mCardContent[39m[33m,[39m [33mCardDescription[39m[33m,[39m [33mCardHeader[39m[33m,[39m [33mCardTitle[39m } [36mfrom[39m [32m"@/components/ui/card"[39m[0m
+[0m [90m  6 |[39m [36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mClock[39m[33m,[39m [33mMapPin[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHeart[39m[33m,[39m [33mMic[39m[33m,[39m [33mCoffee[39m[33m,[39m [33mUtensils[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { getEventSchedule[33m,[39m type [33mEventSchedule[39m } [36mfrom[39m [32m"@/lib/api"[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m  8 |[39m[0m
+[0m [90m  9 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mSchedulePage[39m() {[0m
+[0m [90m 10 |[39m   [36mconst[39m [schedule[33m,[39m setSchedule] [33m=[39m useState[33m<[39m[33mEventSchedule[39m [33m|[39m [36mnull[39m[33m>[39m([36mnull[39m)[0m
+
+The export getEventSchedule was not found in module [project]/lib/api/index.ts [app-client] (ecmascript).
+Did you mean to import getSchedule?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+
+./app/schedule/page.tsx:7:1
+Export getEventSchedule doesn't exist in target module
+[0m [90m  5 |[39m [36mimport[39m { [33mCard[39m[33m,[39m [33mCardContent[39m[33m,[39m [33mCardDescription[39m[33m,[39m [33mCardHeader[39m[33m,[39m [33mCardTitle[39m } [36mfrom[39m [32m"@/components/ui/card"[39m[0m
+[0m [90m  6 |[39m [36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mClock[39m[33m,[39m [33mMapPin[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHeart[39m[33m,[39m [33mMic[39m[33m,[39m [33mCoffee[39m[33m,[39m [33mUtensils[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { getEventSchedule[33m,[39m type [33mEventSchedule[39m } [36mfrom[39m [32m"@/lib/api"[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m  8 |[39m[0m
+[0m [90m  9 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mSchedulePage[39m() {[0m
+[0m [90m 10 |[39m   [36mconst[39m [schedule[33m,[39m setSchedule] [33m=[39m useState[33m<[39m[33mEventSchedule[39m [33m|[39m [36mnull[39m[33m>[39m([36mnull[39m)[0m
+
+The export getEventSchedule was not found in module [project]/lib/api/index.ts [app-ssr] (ecmascript).
+Did you mean to import getSchedule?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+ ⨯ ./app/volunteer/page.tsx:9:1
+Export submitVolunteerApplication doesn't exist in target module
+[0m [90m  7 |[39m [36mimport[39m { [33mLabel[39m } [36mfrom[39m [32m"@/components/ui/label"[39m[0m
+[0m [90m  8 |[39m [36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mClock[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHeart[39m[33m,[39m [33mHandHeart[39m[33m,[39m [33mCoffee[39m[33m,[39m [33mMapPin[39m[33m,[39m [33mCheckCircle[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m { submitVolunteerApplication[33m,[39m type [33mVolunteerData[39m } [36mfrom[39m [32m"@/lib/api"[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m 10 |[39m[0m
+[0m [90m 11 |[39m [36minterface[39m [33mVolunteerFormData[39m [36mextends[39m [33mVolunteerData[39m {[0m
+[0m [90m 12 |[39m   firstName[33m:[39m string[0m
+
+The export submitVolunteerApplication was not found in module [project]/lib/api/index.ts [app-client] (ecmascript).
+Did you mean to import getVolunteer?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+
+./app/volunteer/page.tsx:9:1
+Export submitVolunteerApplication doesn't exist in target module
+[0m [90m  7 |[39m [36mimport[39m { [33mLabel[39m } [36mfrom[39m [32m"@/components/ui/label"[39m[0m
+[0m [90m  8 |[39m [36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mClock[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHeart[39m[33m,[39m [33mHandHeart[39m[33m,[39m [33mCoffee[39m[33m,[39m [33mMapPin[39m[33m,[39m [33mCheckCircle[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m { submitVolunteerApplication[33m,[39m type [33mVolunteerData[39m } [36mfrom[39m [32m"@/lib/api"[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m 10 |[39m[0m
+[0m [90m 11 |[39m [36minterface[39m [33mVolunteerFormData[39m [36mextends[39m [33mVolunteerData[39m {[0m
+[0m [90m 12 |[39m   firstName[33m:[39m string[0m
+
+The export submitVolunteerApplication was not found in module [project]/lib/api/index.ts [app-ssr] (ecmascript).
+Did you mean to import getVolunteer?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+ ✓ Compiled /register in 8.6s
+ GET /about 500 in 6781ms
+ GET /about 500 in 9227ms
+ GET /schedule 500 in 9374ms
+ GET /volunteer 500 in 9378ms
+ ⨯ ./app/schedule/page.tsx:7:1
+Export getEventSchedule doesn't exist in target module
+[0m [90m  5 |[39m [36mimport[39m { [33mCard[39m[33m,[39m [33mCardContent[39m[33m,[39m [33mCardDescription[39m[33m,[39m [33mCardHeader[39m[33m,[39m [33mCardTitle[39m } [36mfrom[39m [32m"@/components/ui/card"[39m[0m
+[0m [90m  6 |[39m [36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mClock[39m[33m,[39m [33mMapPin[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHeart[39m[33m,[39m [33mMic[39m[33m,[39m [33mCoffee[39m[33m,[39m [33mUtensils[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { getEventSchedule[33m,[39m type [33mEventSchedule[39m } [36mfrom[39m [32m"@/lib/api"[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m  8 |[39m[0m
+[0m [90m  9 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mSchedulePage[39m() {[0m
+[0m [90m 10 |[39m   [36mconst[39m [schedule[33m,[39m setSchedule] [33m=[39m useState[33m<[39m[33mEventSchedule[39m [33m|[39m [36mnull[39m[33m>[39m([36mnull[39m)[0m
+
+The export getEventSchedule was not found in module [project]/lib/api/index.ts [app-client] (ecmascript).
+Did you mean to import getSchedule?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+
+./app/schedule/page.tsx:7:1
+Export getEventSchedule doesn't exist in target module
+[0m [90m  5 |[39m [36mimport[39m { [33mCard[39m[33m,[39m [33mCardContent[39m[33m,[39m [33mCardDescription[39m[33m,[39m [33mCardHeader[39m[33m,[39m [33mCardTitle[39m } [36mfrom[39m [32m"@/components/ui/card"[39m[0m
+[0m [90m  6 |[39m [36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mClock[39m[33m,[39m [33mMapPin[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHeart[39m[33m,[39m [33mMic[39m[33m,[39m [33mCoffee[39m[33m,[39m [33mUtensils[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { getEventSchedule[33m,[39m type [33mEventSchedule[39m } [36mfrom[39m [32m"@/lib/api"[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m  8 |[39m[0m
+[0m [90m  9 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mSchedulePage[39m() {[0m
+[0m [90m 10 |[39m   [36mconst[39m [schedule[33m,[39m setSchedule] [33m=[39m useState[33m<[39m[33mEventSchedule[39m [33m|[39m [36mnull[39m[33m>[39m([36mnull[39m)[0m
+
+The export getEventSchedule was not found in module [project]/lib/api/index.ts [app-ssr] (ecmascript).
+Did you mean to import getSchedule?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+ GET /schedule 500 in 294ms
+ GET /register 500 in 628ms
+ ⨯ ./app/volunteer/page.tsx:9:1
+Export submitVolunteerApplication doesn't exist in target module
+[0m [90m  7 |[39m [36mimport[39m { [33mLabel[39m } [36mfrom[39m [32m"@/components/ui/label"[39m[0m
+[0m [90m  8 |[39m [36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mClock[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHeart[39m[33m,[39m [33mHandHeart[39m[33m,[39m [33mCoffee[39m[33m,[39m [33mMapPin[39m[33m,[39m [33mCheckCircle[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m { submitVolunteerApplication[33m,[39m type [33mVolunteerData[39m } [36mfrom[39m [32m"@/lib/api"[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m 10 |[39m[0m
+[0m [90m 11 |[39m [36minterface[39m [33mVolunteerFormData[39m [36mextends[39m [33mVolunteerData[39m {[0m
+[0m [90m 12 |[39m   firstName[33m:[39m string[0m
+
+The export submitVolunteerApplication was not found in module [project]/lib/api/index.ts [app-client] (ecmascript).
+Did you mean to import getVolunteer?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+
+./app/volunteer/page.tsx:9:1
+Export submitVolunteerApplication doesn't exist in target module
+[0m [90m  7 |[39m [36mimport[39m { [33mLabel[39m } [36mfrom[39m [32m"@/components/ui/label"[39m[0m
+[0m [90m  8 |[39m [36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mClock[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHeart[39m[33m,[39m [33mHandHeart[39m[33m,[39m [33mCoffee[39m[33m,[39m [33mMapPin[39m[33m,[39m [33mCheckCircle[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m { submitVolunteerApplication[33m,[39m type [33mVolunteerData[39m } [36mfrom[39m [32m"@/lib/api"[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m 10 |[39m[0m
+[0m [90m 11 |[39m [36minterface[39m [33mVolunteerFormData[39m [36mextends[39m [33mVolunteerData[39m {[0m
+[0m [90m 12 |[39m   firstName[33m:[39m string[0m
+
+The export submitVolunteerApplication was not found in module [project]/lib/api/index.ts [app-ssr] (ecmascript).
+Did you mean to import getVolunteer?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+ GET /volunteer 500 in 430ms
+ GET / 500 in 370ms
+ GET / 500 in 418ms
+ GET / 500 in 139ms
+ GET / 500 in 174ms
+ GET / 500 in 385ms
+ GET / 500 in 385ms
+ GET /non-existent-page 500 in 369ms
+ GET / 500 in 508ms
+ GET /register 500 in 559ms
+ GET / 500 in 174ms
+ GET /favicon.ico 500 in 47ms
+ GET / 500 in 123ms
+ ⨯ ./app/volunteer/page.tsx:9:1
+Export submitVolunteerApplication doesn't exist in target module
+[0m [90m  7 |[39m [36mimport[39m { [33mLabel[39m } [36mfrom[39m [32m"@/components/ui/label"[39m[0m
+[0m [90m  8 |[39m [36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mClock[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHeart[39m[33m,[39m [33mHandHeart[39m[33m,[39m [33mCoffee[39m[33m,[39m [33mMapPin[39m[33m,[39m [33mCheckCircle[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m { submitVolunteerApplication[33m,[39m type [33mVolunteerData[39m } [36mfrom[39m [32m"@/lib/api"[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m 10 |[39m[0m
+[0m [90m 11 |[39m [36minterface[39m [33mVolunteerFormData[39m [36mextends[39m [33mVolunteerData[39m {[0m
+[0m [90m 12 |[39m   firstName[33m:[39m string[0m
+
+The export submitVolunteerApplication was not found in module [project]/lib/api/index.ts [app-client] (ecmascript).
+Did you mean to import getVolunteer?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+
+./app/volunteer/page.tsx:9:1
+Export submitVolunteerApplication doesn't exist in target module
+[0m [90m  7 |[39m [36mimport[39m { [33mLabel[39m } [36mfrom[39m [32m"@/components/ui/label"[39m[0m
+[0m [90m  8 |[39m [36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mClock[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHeart[39m[33m,[39m [33mHandHeart[39m[33m,[39m [33mCoffee[39m[33m,[39m [33mMapPin[39m[33m,[39m [33mCheckCircle[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m { submitVolunteerApplication[33m,[39m type [33mVolunteerData[39m } [36mfrom[39m [32m"@/lib/api"[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m 10 |[39m[0m
+[0m [90m 11 |[39m [36minterface[39m [33mVolunteerFormData[39m [36mextends[39m [33mVolunteerData[39m {[0m
+[0m [90m 12 |[39m   firstName[33m:[39m string[0m
+
+The export submitVolunteerApplication was not found in module [project]/lib/api/index.ts [app-ssr] (ecmascript).
+Did you mean to import getVolunteer?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+ GET /volunteer 500 in 107ms
+ GET /favicon.ico 500 in 94ms
+ GET / 500 in 112ms
+ GET / 500 in 161ms
+ GET /about 500 in 241ms
+ GET /favicon.ico 500 in 137ms
+ GET /register 500 in 220ms
+ GET /favicon.ico 500 in 145ms
+ GET / 500 in 354ms
+ GET / 500 in 154ms
+ GET /favicon.ico 500 in 169ms
+ GET / 500 in 860ms
+ GET /about 500 in 396ms
+ ⨯ ./app/schedule/page.tsx:7:1
+Export getEventSchedule doesn't exist in target module
+[0m [90m  5 |[39m [36mimport[39m { [33mCard[39m[33m,[39m [33mCardContent[39m[33m,[39m [33mCardDescription[39m[33m,[39m [33mCardHeader[39m[33m,[39m [33mCardTitle[39m } [36mfrom[39m [32m"@/components/ui/card"[39m[0m
+[0m [90m  6 |[39m [36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mClock[39m[33m,[39m [33mMapPin[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHeart[39m[33m,[39m [33mMic[39m[33m,[39m [33mCoffee[39m[33m,[39m [33mUtensils[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { getEventSchedule[33m,[39m type [33mEventSchedule[39m } [36mfrom[39m [32m"@/lib/api"[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m  8 |[39m[0m
+[0m [90m  9 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mSchedulePage[39m() {[0m
+[0m [90m 10 |[39m   [36mconst[39m [schedule[33m,[39m setSchedule] [33m=[39m useState[33m<[39m[33mEventSchedule[39m [33m|[39m [36mnull[39m[33m>[39m([36mnull[39m)[0m
+
+The export getEventSchedule was not found in module [project]/lib/api/index.ts [app-client] (ecmascript).
+Did you mean to import getSchedule?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+
+./app/schedule/page.tsx:7:1
+Export getEventSchedule doesn't exist in target module
+[0m [90m  5 |[39m [36mimport[39m { [33mCard[39m[33m,[39m [33mCardContent[39m[33m,[39m [33mCardDescription[39m[33m,[39m [33mCardHeader[39m[33m,[39m [33mCardTitle[39m } [36mfrom[39m [32m"@/components/ui/card"[39m[0m
+[0m [90m  6 |[39m [36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mClock[39m[33m,[39m [33mMapPin[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHeart[39m[33m,[39m [33mMic[39m[33m,[39m [33mCoffee[39m[33m,[39m [33mUtensils[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { getEventSchedule[33m,[39m type [33mEventSchedule[39m } [36mfrom[39m [32m"@/lib/api"[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m  8 |[39m[0m
+[0m [90m  9 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mSchedulePage[39m() {[0m
+[0m [90m 10 |[39m   [36mconst[39m [schedule[33m,[39m setSchedule] [33m=[39m useState[33m<[39m[33mEventSchedule[39m [33m|[39m [36mnull[39m[33m>[39m([36mnull[39m)[0m
+
+The export getEventSchedule was not found in module [project]/lib/api/index.ts [app-ssr] (ecmascript).
+Did you mean to import getSchedule?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+ GET /schedule 500 in 280ms
+ GET /favicon.ico 500 in 144ms
+ ⨯ ./app/schedule/page.tsx:7:1
+Export getEventSchedule doesn't exist in target module
+[0m [90m  5 |[39m [36mimport[39m { [33mCard[39m[33m,[39m [33mCardContent[39m[33m,[39m [33mCardDescription[39m[33m,[39m [33mCardHeader[39m[33m,[39m [33mCardTitle[39m } [36mfrom[39m [32m"@/components/ui/card"[39m[0m
+[0m [90m  6 |[39m [36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mClock[39m[33m,[39m [33mMapPin[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHeart[39m[33m,[39m [33mMic[39m[33m,[39m [33mCoffee[39m[33m,[39m [33mUtensils[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { getEventSchedule[33m,[39m type [33mEventSchedule[39m } [36mfrom[39m [32m"@/lib/api"[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m  8 |[39m[0m
+[0m [90m  9 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mSchedulePage[39m() {[0m
+[0m [90m 10 |[39m   [36mconst[39m [schedule[33m,[39m setSchedule] [33m=[39m useState[33m<[39m[33mEventSchedule[39m [33m|[39m [36mnull[39m[33m>[39m([36mnull[39m)[0m
+
+The export getEventSchedule was not found in module [project]/lib/api/index.ts [app-client] (ecmascript).
+Did you mean to import getSchedule?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+
+./app/schedule/page.tsx:7:1
+Export getEventSchedule doesn't exist in target module
+[0m [90m  5 |[39m [36mimport[39m { [33mCard[39m[33m,[39m [33mCardContent[39m[33m,[39m [33mCardDescription[39m[33m,[39m [33mCardHeader[39m[33m,[39m [33mCardTitle[39m } [36mfrom[39m [32m"@/components/ui/card"[39m[0m
+[0m [90m  6 |[39m [36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mClock[39m[33m,[39m [33mMapPin[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHeart[39m[33m,[39m [33mMic[39m[33m,[39m [33mCoffee[39m[33m,[39m [33mUtensils[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { getEventSchedule[33m,[39m type [33mEventSchedule[39m } [36mfrom[39m [32m"@/lib/api"[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m  8 |[39m[0m
+[0m [90m  9 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mSchedulePage[39m() {[0m
+[0m [90m 10 |[39m   [36mconst[39m [schedule[33m,[39m setSchedule] [33m=[39m useState[33m<[39m[33mEventSchedule[39m [33m|[39m [36mnull[39m[33m>[39m([36mnull[39m)[0m
+
+The export getEventSchedule was not found in module [project]/lib/api/index.ts [app-ssr] (ecmascript).
+Did you mean to import getSchedule?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+ GET /schedule 500 in 78ms
+ GET /register 500 in 439ms
+ ⨯ ./app/volunteer/page.tsx:9:1
+Export submitVolunteerApplication doesn't exist in target module
+[0m [90m  7 |[39m [36mimport[39m { [33mLabel[39m } [36mfrom[39m [32m"@/components/ui/label"[39m[0m
+[0m [90m  8 |[39m [36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mClock[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHeart[39m[33m,[39m [33mHandHeart[39m[33m,[39m [33mCoffee[39m[33m,[39m [33mMapPin[39m[33m,[39m [33mCheckCircle[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m { submitVolunteerApplication[33m,[39m type [33mVolunteerData[39m } [36mfrom[39m [32m"@/lib/api"[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m 10 |[39m[0m
+[0m [90m 11 |[39m [36minterface[39m [33mVolunteerFormData[39m [36mextends[39m [33mVolunteerData[39m {[0m
+[0m [90m 12 |[39m   firstName[33m:[39m string[0m
+
+The export submitVolunteerApplication was not found in module [project]/lib/api/index.ts [app-client] (ecmascript).
+Did you mean to import getVolunteer?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+
+./app/volunteer/page.tsx:9:1
+Export submitVolunteerApplication doesn't exist in target module
+[0m [90m  7 |[39m [36mimport[39m { [33mLabel[39m } [36mfrom[39m [32m"@/components/ui/label"[39m[0m
+[0m [90m  8 |[39m [36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mClock[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHeart[39m[33m,[39m [33mHandHeart[39m[33m,[39m [33mCoffee[39m[33m,[39m [33mMapPin[39m[33m,[39m [33mCheckCircle[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m { submitVolunteerApplication[33m,[39m type [33mVolunteerData[39m } [36mfrom[39m [32m"@/lib/api"[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m 10 |[39m[0m
+[0m [90m 11 |[39m [36minterface[39m [33mVolunteerFormData[39m [36mextends[39m [33mVolunteerData[39m {[0m
+[0m [90m 12 |[39m   firstName[33m:[39m string[0m
+
+The export submitVolunteerApplication was not found in module [project]/lib/api/index.ts [app-ssr] (ecmascript).
+Did you mean to import getVolunteer?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+ GET /volunteer 500 in 298ms
+ GET / 500 in 175ms
+ GET /favicon.ico 500 in 72ms
+ GET / 500 in 233ms
+ GET / 500 in 91ms
+ GET / 500 in 77ms
+ GET /favicon.ico 500 in 42ms
+ GET / 500 in 108ms
+ GET /favicon.ico 200 in 45ms
+ GET / 500 in 180ms
+ GET /favicon.ico 500 in 65ms
+ GET /register 500 in 273ms
+ GET / 500 in 182ms
+ GET / 500 in 332ms
+ GET /non-existent-page 500 in 239ms
+ GET /favicon.ico 500 in 201ms
+ GET / 500 in 390ms
+ ⨯ ./app/schedule/page.tsx:7:1
+Export getEventSchedule doesn't exist in target module
+[0m [90m  5 |[39m [36mimport[39m { [33mCard[39m[33m,[39m [33mCardContent[39m[33m,[39m [33mCardDescription[39m[33m,[39m [33mCardHeader[39m[33m,[39m [33mCardTitle[39m } [36mfrom[39m [32m"@/components/ui/card"[39m[0m
+[0m [90m  6 |[39m [36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mClock[39m[33m,[39m [33mMapPin[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHeart[39m[33m,[39m [33mMic[39m[33m,[39m [33mCoffee[39m[33m,[39m [33mUtensils[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { getEventSchedule[33m,[39m type [33mEventSchedule[39m } [36mfrom[39m [32m"@/lib/api"[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m  8 |[39m[0m
+[0m [90m  9 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mSchedulePage[39m() {[0m
+[0m [90m 10 |[39m   [36mconst[39m [schedule[33m,[39m setSchedule] [33m=[39m useState[33m<[39m[33mEventSchedule[39m [33m|[39m [36mnull[39m[33m>[39m([36mnull[39m)[0m
+
+The export getEventSchedule was not found in module [project]/lib/api/index.ts [app-client] (ecmascript).
+Did you mean to import getSchedule?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+
+./app/schedule/page.tsx:7:1
+Export getEventSchedule doesn't exist in target module
+[0m [90m  5 |[39m [36mimport[39m { [33mCard[39m[33m,[39m [33mCardContent[39m[33m,[39m [33mCardDescription[39m[33m,[39m [33mCardHeader[39m[33m,[39m [33mCardTitle[39m } [36mfrom[39m [32m"@/components/ui/card"[39m[0m
+[0m [90m  6 |[39m [36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mClock[39m[33m,[39m [33mMapPin[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHeart[39m[33m,[39m [33mMic[39m[33m,[39m [33mCoffee[39m[33m,[39m [33mUtensils[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { getEventSchedule[33m,[39m type [33mEventSchedule[39m } [36mfrom[39m [32m"@/lib/api"[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m  8 |[39m[0m
+[0m [90m  9 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mSchedulePage[39m() {[0m
+[0m [90m 10 |[39m   [36mconst[39m [schedule[33m,[39m setSchedule] [33m=[39m useState[33m<[39m[33mEventSchedule[39m [33m|[39m [36mnull[39m[33m>[39m([36mnull[39m)[0m
+
+The export getEventSchedule was not found in module [project]/lib/api/index.ts [app-ssr] (ecmascript).
+Did you mean to import getSchedule?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+ GET /schedule 500 in 304ms
+ GET / 500 in 294ms
+ GET /register 500 in 76ms
+ GET / 500 in 323ms
+ ⨯ ./app/volunteer/page.tsx:9:1
+Export submitVolunteerApplication doesn't exist in target module
+[0m [90m  7 |[39m [36mimport[39m { [33mLabel[39m } [36mfrom[39m [32m"@/components/ui/label"[39m[0m
+[0m [90m  8 |[39m [36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mClock[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHeart[39m[33m,[39m [33mHandHeart[39m[33m,[39m [33mCoffee[39m[33m,[39m [33mMapPin[39m[33m,[39m [33mCheckCircle[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m { submitVolunteerApplication[33m,[39m type [33mVolunteerData[39m } [36mfrom[39m [32m"@/lib/api"[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m 10 |[39m[0m
+[0m [90m 11 |[39m [36minterface[39m [33mVolunteerFormData[39m [36mextends[39m [33mVolunteerData[39m {[0m
+[0m [90m 12 |[39m   firstName[33m:[39m string[0m
+
+The export submitVolunteerApplication was not found in module [project]/lib/api/index.ts [app-client] (ecmascript).
+Did you mean to import getVolunteer?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+
+./app/volunteer/page.tsx:9:1
+Export submitVolunteerApplication doesn't exist in target module
+[0m [90m  7 |[39m [36mimport[39m { [33mLabel[39m } [36mfrom[39m [32m"@/components/ui/label"[39m[0m
+[0m [90m  8 |[39m [36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mClock[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHeart[39m[33m,[39m [33mHandHeart[39m[33m,[39m [33mCoffee[39m[33m,[39m [33mMapPin[39m[33m,[39m [33mCheckCircle[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m { submitVolunteerApplication[33m,[39m type [33mVolunteerData[39m } [36mfrom[39m [32m"@/lib/api"[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m 10 |[39m[0m
+[0m [90m 11 |[39m [36minterface[39m [33mVolunteerFormData[39m [36mextends[39m [33mVolunteerData[39m {[0m
+[0m [90m 12 |[39m   firstName[33m:[39m string[0m
+
+The export submitVolunteerApplication was not found in module [project]/lib/api/index.ts [app-ssr] (ecmascript).
+Did you mean to import getVolunteer?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+ GET /volunteer 500 in 255ms
+ GET / 500 in 528ms
+ GET /about 500 in 336ms
+ GET / 500 in 271ms
+ GET / 500 in 916ms
+ GET / 500 in 697ms
+ GET / 500 in 216ms
+ GET /about 500 in 183ms
+ GET / 500 in 243ms
+ GET / 500 in 396ms
+ ⨯ ./app/schedule/page.tsx:7:1
+Export getEventSchedule doesn't exist in target module
+[0m [90m  5 |[39m [36mimport[39m { [33mCard[39m[33m,[39m [33mCardContent[39m[33m,[39m [33mCardDescription[39m[33m,[39m [33mCardHeader[39m[33m,[39m [33mCardTitle[39m } [36mfrom[39m [32m"@/components/ui/card"[39m[0m
+[0m [90m  6 |[39m [36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mClock[39m[33m,[39m [33mMapPin[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHeart[39m[33m,[39m [33mMic[39m[33m,[39m [33mCoffee[39m[33m,[39m [33mUtensils[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { getEventSchedule[33m,[39m type [33mEventSchedule[39m } [36mfrom[39m [32m"@/lib/api"[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m  8 |[39m[0m
+[0m [90m  9 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mSchedulePage[39m() {[0m
+[0m [90m 10 |[39m   [36mconst[39m [schedule[33m,[39m setSchedule] [33m=[39m useState[33m<[39m[33mEventSchedule[39m [33m|[39m [36mnull[39m[33m>[39m([36mnull[39m)[0m
+
+The export getEventSchedule was not found in module [project]/lib/api/index.ts [app-client] (ecmascript).
+Did you mean to import getSchedule?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+
+./app/schedule/page.tsx:7:1
+Export getEventSchedule doesn't exist in target module
+[0m [90m  5 |[39m [36mimport[39m { [33mCard[39m[33m,[39m [33mCardContent[39m[33m,[39m [33mCardDescription[39m[33m,[39m [33mCardHeader[39m[33m,[39m [33mCardTitle[39m } [36mfrom[39m [32m"@/components/ui/card"[39m[0m
+[0m [90m  6 |[39m [36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mClock[39m[33m,[39m [33mMapPin[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHeart[39m[33m,[39m [33mMic[39m[33m,[39m [33mCoffee[39m[33m,[39m [33mUtensils[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { getEventSchedule[33m,[39m type [33mEventSchedule[39m } [36mfrom[39m [32m"@/lib/api"[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m  8 |[39m[0m
+[0m [90m  9 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mSchedulePage[39m() {[0m
+[0m [90m 10 |[39m   [36mconst[39m [schedule[33m,[39m setSchedule] [33m=[39m useState[33m<[39m[33mEventSchedule[39m [33m|[39m [36mnull[39m[33m>[39m([36mnull[39m)[0m
+
+The export getEventSchedule was not found in module [project]/lib/api/index.ts [app-ssr] (ecmascript).
+Did you mean to import getSchedule?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+ GET /schedule 500 in 152ms
+ GET /register 500 in 260ms
+ GET / 500 in 237ms
+ GET /non-existent-page 500 in 258ms
+ GET / 500 in 554ms
+ ⨯ ./app/volunteer/page.tsx:9:1
+Export submitVolunteerApplication doesn't exist in target module
+[0m [90m  7 |[39m [36mimport[39m { [33mLabel[39m } [36mfrom[39m [32m"@/components/ui/label"[39m[0m
+[0m [90m  8 |[39m [36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mClock[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHeart[39m[33m,[39m [33mHandHeart[39m[33m,[39m [33mCoffee[39m[33m,[39m [33mMapPin[39m[33m,[39m [33mCheckCircle[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m { submitVolunteerApplication[33m,[39m type [33mVolunteerData[39m } [36mfrom[39m [32m"@/lib/api"[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m 10 |[39m[0m
+[0m [90m 11 |[39m [36minterface[39m [33mVolunteerFormData[39m [36mextends[39m [33mVolunteerData[39m {[0m
+[0m [90m 12 |[39m   firstName[33m:[39m string[0m
+
+The export submitVolunteerApplication was not found in module [project]/lib/api/index.ts [app-client] (ecmascript).
+Did you mean to import getVolunteer?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+
+./app/volunteer/page.tsx:9:1
+Export submitVolunteerApplication doesn't exist in target module
+[0m [90m  7 |[39m [36mimport[39m { [33mLabel[39m } [36mfrom[39m [32m"@/components/ui/label"[39m[0m
+[0m [90m  8 |[39m [36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mClock[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHeart[39m[33m,[39m [33mHandHeart[39m[33m,[39m [33mCoffee[39m[33m,[39m [33mMapPin[39m[33m,[39m [33mCheckCircle[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m[31m[1m>[22m[39m[90m  9 |[39m [36mimport[39m { submitVolunteerApplication[33m,[39m type [33mVolunteerData[39m } [36mfrom[39m [32m"@/lib/api"[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m 10 |[39m[0m
+[0m [90m 11 |[39m [36minterface[39m [33mVolunteerFormData[39m [36mextends[39m [33mVolunteerData[39m {[0m
+[0m [90m 12 |[39m   firstName[33m:[39m string[0m
+
+The export submitVolunteerApplication was not found in module [project]/lib/api/index.ts [app-ssr] (ecmascript).
+Did you mean to import getVolunteer?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+ GET /volunteer 500 in 157ms
+ GET / 500 in 341ms
+ GET /register 500 in 316ms
+ GET / 500 in 169ms
+ GET / 500 in 162ms
+ GET / 500 in 326ms
+ ⨯ ./app/schedule/page.tsx:7:1
+Export getEventSchedule doesn't exist in target module
+[0m [90m  5 |[39m [36mimport[39m { [33mCard[39m[33m,[39m [33mCardContent[39m[33m,[39m [33mCardDescription[39m[33m,[39m [33mCardHeader[39m[33m,[39m [33mCardTitle[39m } [36mfrom[39m [32m"@/components/ui/card"[39m[0m
+[0m [90m  6 |[39m [36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mClock[39m[33m,[39m [33mMapPin[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHeart[39m[33m,[39m [33mMic[39m[33m,[39m [33mCoffee[39m[33m,[39m [33mUtensils[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { getEventSchedule[33m,[39m type [33mEventSchedule[39m } [36mfrom[39m [32m"@/lib/api"[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m  8 |[39m[0m
+[0m [90m  9 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mSchedulePage[39m() {[0m
+[0m [90m 10 |[39m   [36mconst[39m [schedule[33m,[39m setSchedule] [33m=[39m useState[33m<[39m[33mEventSchedule[39m [33m|[39m [36mnull[39m[33m>[39m([36mnull[39m)[0m
+
+The export getEventSchedule was not found in module [project]/lib/api/index.ts [app-client] (ecmascript).
+Did you mean to import getSchedule?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+
+./app/schedule/page.tsx:7:1
+Export getEventSchedule doesn't exist in target module
+[0m [90m  5 |[39m [36mimport[39m { [33mCard[39m[33m,[39m [33mCardContent[39m[33m,[39m [33mCardDescription[39m[33m,[39m [33mCardHeader[39m[33m,[39m [33mCardTitle[39m } [36mfrom[39m [32m"@/components/ui/card"[39m[0m
+[0m [90m  6 |[39m [36mimport[39m { [33mArrowLeft[39m[33m,[39m [33mClock[39m[33m,[39m [33mMapPin[39m[33m,[39m [33mUsers[39m[33m,[39m [33mHeart[39m[33m,[39m [33mMic[39m[33m,[39m [33mCoffee[39m[33m,[39m [33mUtensils[39m[33m,[39m [33mLoader2[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { getEventSchedule[33m,[39m type [33mEventSchedule[39m } [36mfrom[39m [32m"@/lib/api"[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m  8 |[39m[0m
+[0m [90m  9 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mSchedulePage[39m() {[0m
+[0m [90m 10 |[39m   [36mconst[39m [schedule[33m,[39m setSchedule] [33m=[39m useState[33m<[39m[33mEventSchedule[39m [33m|[39m [36mnull[39m[33m>[39m([36mnull[39m)[0m
+
+The export getEventSchedule was not found in module [project]/lib/api/index.ts [app-ssr] (ecmascript).
+Did you mean to import getSchedule?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+ GET /register 500 in 569ms
+ GET /schedule 500 in 339ms
+ GET / 500 in 327ms
+ GET / 500 in 86ms
+ GET / 500 in 298ms
+ GET /favicon.ico 500 in 336ms
+ ✓ Compiled in 25ms
+ ✓ Compiled in 48ms
+ GET / 200 in 274ms
+ GET / 200 in 184ms
+ GET / 200 in 121ms
+ GET / 200 in 269ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 350ms
+ GET /register 200 in 475ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 340ms
+ GET / 200 in 264ms
+ ✓ Compiled /schedule in 53ms
+ GET /schedule 200 in 450ms
+ ✓ Compiled /volunteer in 41ms
+ GET /volunteer 200 in 407ms
+ GET /about 200 in 180ms
+ GET / 200 in 169ms
+ GET / 200 in 127ms
+ GET / 200 in 119ms
+ GET / 200 in 84ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 348ms
+ GET / 200 in 403ms
+ GET /register 200 in 719ms
+ ○ Compiling /auth/login ...
+ ✓ Compiled /auth/login in 1710ms
+ GET /auth/login?redirect=%2Fregister%2Fcheckout-protected&message=auth_required 200 in 1787ms
+ ○ Compiling /register/checkout-protected ...
+ ✓ Compiled /register/checkout-protected in 1553ms
+ ⨯ ./components/ui/radio-group.tsx:4:1
+Module not found: Can't resolve '@radix-ui/react-radio-group'
+[0m [90m 2 |[39m[0m
+[0m [90m 3 |[39m [36mimport[39m [33m*[39m [36mas[39m [33mReact[39m [36mfrom[39m [32m"react"[39m[0m
+[0m[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m [33m*[39m [36mas[39m [33mRadioGroupPrimitive[39m [36mfrom[39m [32m"@radix-ui/react-radio-group"[39m[0m
+[0m [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m 5 |[39m [36mimport[39m { [33mCircle[39m } [36mfrom[39m [32m"lucide-react"[39m[0m
+[0m [90m 6 |[39m[0m
+[0m [90m 7 |[39m [36mimport[39m { cn } [36mfrom[39m [32m"@/lib/utils"[39m[0m
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./components/stripe-payment-form.tsx:4:1
+Module not found: Can't resolve '@stripe/stripe-js'
+[0m [90m 2 |[39m[0m
+[0m [90m 3 |[39m [36mimport[39m { useEffect[33m,[39m useState } [36mfrom[39m [32m'react'[39m[0m
+[0m[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m { loadStripe } [36mfrom[39m [32m'@stripe/stripe-js'[39m[0m
+[0m [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m 5 |[39m [36mimport[39m type { [33mStripe[39m[33m,[39m [33mStripeElements[39m[33m,[39m [33mStripeCardElement[39m } [36mfrom[39m [32m'@stripe/stripe-js'[39m[0m
+[0m [90m 6 |[39m [36mimport[39m { [33mButton[39m } [36mfrom[39m [32m'@/components/ui/button'[39m[0m
+[0m [90m 7 |[39m [36mimport[39m { [33mAlertCircle[39m[33m,[39m [33mLoader2[39m[33m,[39m [33mCreditCard[39m } [36mfrom[39m [32m'lucide-react'[39m[0m
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./components/square-payment-form-fixed.tsx:8:1
+Module not found: Can't resolve 'canvas-confetti'
+[0m [90m  6 |[39m [36mimport[39m { [33mAlert[39m[33m,[39m [33mAlertDescription[39m } [36mfrom[39m [32m'@/components/ui/alert'[39m[0m
+[0m [90m  7 |[39m [36mimport[39m { [33mAlertCircle[39m[33m,[39m [33mLoader2[39m[33m,[39m [33mCheckCircle[39m[33m,[39m [33mCreditCard[39m[33m,[39m [33mSparkles[39m } [36mfrom[39m [32m'lucide-react'[39m[0m
+[0m[31m[1m>[22m[39m[90m  8 |[39m [36mimport[39m confetti [36mfrom[39m [32m'canvas-confetti'[39m[0m
+[0m [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m  9 |[39m[0m
+[0m [90m 10 |[39m [36minterface[39m [33mSquarePaymentFormFixedProps[39m {[0m
+[0m [90m 11 |[39m   amount[33m:[39m number[0m
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+ GET /register/checkout-protected 500 in 1666ms
+ GET /favicon.ico 500 in 76ms
+ ✓ Compiled in 108ms
+ GET / 200 in 477ms
+ ○ Compiling /register/checkout-protected ...
+ ✓ Compiled /register/checkout-protected in 922ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 461ms
+ GET /register/checkout-protected 200 in 2607ms
+ POST /api/registrations 404 in 578ms
+ POST /api/registrations 404 in 577ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 633ms
+ GET /register/checkout-protected 200 in 190ms
+ POST /api/registrations 404 in 397ms
+ POST /api/registrations 404 in 402ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 433ms
+ GET /register/checkout-protected 200 in 208ms
+ POST /api/registrations 404 in 267ms
+ POST /api/registrations 404 in 268ms
+ GET /favicon.ico?favicon.45db1c09.ico 200 in 251ms
+ GET /register 200 in 156ms
+ GET / 200 in 84ms
+ GET / 200 in 42ms
+ GET / 200 in 121ms
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/favicon.ico/[__metadata_id__]/route/app-paths-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/favicon.ico/[__metadata_id__]/route/app-paths-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/register/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/register/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/register/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/register/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/favicon.ico/[__metadata_id__]/route/app-paths-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/favicon.ico/[__metadata_id__]/route/app-paths-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/favicon.ico/[__metadata_id__]/route/app-paths-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/favicon.ico/[__metadata_id__]/route/app-paths-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/schedule/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/schedule/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/schedule/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/schedule/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/favicon.ico/[__metadata_id__]/route/app-paths-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/favicon.ico/[__metadata_id__]/route/app-paths-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/volunteer/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/volunteer/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/volunteer/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/volunteer/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/favicon.ico/[__metadata_id__]/route/app-paths-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/favicon.ico/[__metadata_id__]/route/app-paths-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/about/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/about/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/about/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/about/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/favicon.ico/[__metadata_id__]/route/app-paths-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/favicon.ico/[__metadata_id__]/route/app-paths-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/page/app-build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/favicon.ico/[__metadata_id__]/route/app-paths-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/favicon.ico/[__metadata_id__]/route/app-paths-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/_not-found/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/_not-found/page/app-build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/_not-found/page/app-build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/app/_not-found/page/app-build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/david/Herd/founders-day/founders-day-frontend/.next/server/pages/_app/build-manifest.json'
+}
+[?25h

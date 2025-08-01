@@ -1,0 +1,8 @@
+npm error Missing script: "test:bdd"
+npm error
+npm error Did you mean this?
+npm error   npm run test:all # run the "test:all" package script
+npm error
+npm error To see a list of scripts, run:
+npm error   npm run
+npm error A complete log of this run can be found in: /Users/david/.npm/_logs/2025-07-27T18_50_50_641Z-debug-0.log
