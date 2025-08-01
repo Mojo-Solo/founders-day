@@ -1,15 +1,33 @@
-name: Production Deployment Pipeline
+name: Production Deployment Pipeline with Square Payment Integration
 
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+      force_deploy:
+        description: 'Force deployment (skip some checks)'
+        required: false
+        default: false
+        type: boolean
 
 env:
   NODE_VERSION: '20'
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  SQUARE_WEBHOOK_SIGNATURE_KEY: ${{ secrets.SQUARE_WEBHOOK_SIGNATURE_KEY }}
+  DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+  SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -17,9 +35,9 @@ concurrency:
 
 jobs:
   test-and-quality:
-    name: Test & Quality Assurance
+    name: Test & Quality Assurance with Square Integration
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     
     steps:
       - name: Checkout code
@@ -52,12 +70,32 @@ jobs:
         env:
           CI: true
 
+      - name: Run Square payment integration tests
+        run: |
+          npm run test:square
+          npm run test:integration
+        env:
+          CI: true
+          SQUARE_APPLICATION_ID: ${{ secrets.SQUARE_APPLICATION_ID_SANDBOX }}
+          SQUARE_ACCESS_TOKEN: ${{ secrets.SQUARE_ACCESS_TOKEN_SANDBOX }}
+          SQUARE_ENVIRONMENT: sandbox
+
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage/lcov.info
           fail_ci_if_error: false
+
+      - name: Upload Square test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: square-test-results-${{ github.sha }}
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
@@ -67,9 +105,9 @@ jobs:
         continue-on-error: true
 
   security-scan:
-    name: Security Analysis
+    name: Security Analysis with PCI DSS Compliance
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     
     steps:
       - name: Checkout code
@@ -83,6 +121,48 @@ jobs:
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
+
+      - name: PCI DSS Compliance Scan
+        run: |
+          echo "🔒 Running PCI DSS compliance checks..."
+          # Check for sensitive data exposure
+          if grep -r "sk_" --include="*.ts" --include="*.js" --include="*.tsx" .; then
+            echo "❌ Found potential Square API key exposure"
+            exit 1
+          fi
+          
+          # Check for webhook signature validation
+          if ! grep -r "verifyWebhookSignature" --include="*.ts" --include="*.js" .; then
+            echo "⚠️ Webhook signature validation not found"
+          fi
+          
+          # Check for HTTPS enforcement
+          if ! grep -r "https://" next.config.js; then
+            echo "⚠️ HTTPS enforcement not detected in config"
+          fi
+          
+          echo "✅ PCI DSS compliance checks completed"
+
+      - name: Square API Security Validation
+        run: |
+          echo "🔐 Validating Square API security implementation..."
+          
+          # Check for proper environment variable usage
+          if grep -r "SQUARE.*=" --include="*.ts" --include="*.js" --exclude-dir=node_modules .; then
+            echo "⚠️ Found hardcoded Square configuration (should use env vars)"
+          fi
+          
+          # Verify webhook endpoint security
+          if [ -f "app/api/webhooks/square/route.ts" ]; then
+            if grep -q "verifySignature" app/api/webhooks/square/route.ts; then
+              echo "✅ Webhook signature verification implemented"
+            else
+              echo "❌ Webhook signature verification missing"
+              exit 1
+            fi
+          fi
+          
+          echo "✅ Square API security validation completed"
 
       - name: Snyk security scan
         uses: snyk/actions/node@master
@@ -98,6 +178,16 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         continue-on-error: true
+
+      - name: Upload security scan results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-scan-results-${{ github.sha }}
+          path: |
+            .sarif/
+            security-report.json
+          retention-days: 30
 
   build-and-validate:
     name: Build & Performance Validation

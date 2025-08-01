@@ -1,0 +1,462 @@
+name: Square Payment Integration Testing
+
+on:
+  push:
+    branches: [ main, develop, feature/* ]
+    paths:
+      - 'app/api/square/**'
+      - 'components/**/*square*'
+      - 'lib/**/*square*'
+      - 'test/**'
+      - 'package.json'
+      - 'package-lock.json'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'app/api/square/**'
+      - 'components/**/*square*'
+      - 'lib/**/*square*'
+      - 'test/**'
+      - 'package.json'
+      - 'package-lock.json'
+  schedule:
+    # Run nightly tests at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Type of tests to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - unit
+          - integration
+          - e2e
+          - performance
+      coverage_threshold:
+        description: 'Coverage threshold percentage'
+        required: false
+        default: '85'
+        type: string
+
+env:
+  NODE_VERSION: '18'
+  SQUARE_ENVIRONMENT: 'sandbox'
+  DATABASE_URL: 'postgresql://postgres:test@localhost:5432/test_db'
+  SUPABASE_URL: 'http://localhost:54321'
+  SUPABASE_ANON_KEY: 'test-anon-key'
+  SUPABASE_SERVICE_ROLE_KEY: 'test-service-role-key'
+
+jobs:
+  # Job 1: Setup and Validation
+  setup:
+    name: Setup and Validation
+    runs-on: ubuntu-latest
+    outputs:
+      cache-key: ${{ steps.cache-key.outputs.key }}
+      test-matrix: ${{ steps.test-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Generate cache key
+        id: cache-key
+        run: |
+          echo "key=deps-${{ runner.os }}-${{ hashFiles('package-lock.json') }}" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: ${{ steps.cache-key.outputs.key }}
+          restore-keys: |
+            deps-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate configuration
+        run: |
+          npm run type-check
+          npm run lint
+
+      - name: Generate test matrix
+        id: test-matrix
+        run: |
+          if [ "${{ github.event.inputs.test_type }}" = "unit" ]; then
+            echo 'matrix={"include":[{"name":"unit","script":"test:unit"}]}' >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.inputs.test_type }}" = "integration" ]; then
+            echo 'matrix={"include":[{"name":"integration","script":"test:integration"}]}' >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.inputs.test_type }}" = "e2e" ]; then
+            echo 'matrix={"include":[{"name":"e2e","script":"test:e2e"}]}' >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.inputs.test_type }}" = "performance" ]; then
+            echo 'matrix={"include":[{"name":"performance","script":"test:performance"}]}' >> $GITHUB_OUTPUT
+          else
+            echo 'matrix={"include":[{"name":"unit","script":"test:unit"},{"name":"integration","script":"test:integration"},{"name":"e2e","script":"test:e2e"},{"name":"performance","script":"test:performance"}]}' >> $GITHUB_OUTPUT
+          fi
+
+  # Job 2: Unit Tests
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: setup
+    if: contains(needs.setup.outputs.test-matrix, 'unit')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Restore dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: ${{ needs.setup.outputs.cache-key }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests with coverage
+        run: |
+          npm run test:unit -- --coverage --reporter=json --reporter=html --reporter=junit
+        env:
+          COVERAGE_THRESHOLD: ${{ github.event.inputs.coverage_threshold || '85' }}
+
+      - name: Upload unit test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-test-results
+          path: |
+            coverage/
+            test-results/
+          retention-days: 30
+
+      - name: Comment coverage on PR
+        if: github.event_name == 'pull_request'
+        uses: romeovs/lcov-reporter-action@v0.3.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          lcov-file: ./coverage/lcov.info
+          delete-old-comments: true
+
+  # Job 3: Integration Tests
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: setup
+    if: contains(needs.setup.outputs.test-matrix, 'integration')
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Restore dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: ${{ needs.setup.outputs.cache-key }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup test database
+        run: |
+          PGPASSWORD=test psql -h localhost -U postgres -d test_db -f ./20250801_square_payment_integration.sql
+
+      - name: Run integration tests
+        run: |
+          npm run test:integration -- --reporter=json --reporter=html --reporter=junit
+        env:
+          SQUARE_ACCESS_TOKEN: ${{ secrets.SQUARE_SANDBOX_ACCESS_TOKEN }}
+          SQUARE_LOCATION_ID: ${{ secrets.SQUARE_SANDBOX_LOCATION_ID }}
+          SQUARE_WEBHOOK_SIGNATURE_KEY: ${{ secrets.SQUARE_WEBHOOK_SIGNATURE_KEY }}
+
+      - name: Upload integration test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-test-results
+          path: |
+            test-results/
+          retention-days: 30
+
+  # Job 4: E2E Tests
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: setup
+    if: contains(needs.setup.outputs.test-matrix, 'e2e')
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    strategy:
+      matrix:
+        browser: [chromium, firefox, webkit]
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Restore dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: ${{ needs.setup.outputs.cache-key }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Setup test database
+        run: |
+          PGPASSWORD=test psql -h localhost -U postgres -d test_db -f ./20250801_square_payment_integration.sql
+
+      - name: Run E2E tests
+        run: |
+          npm run test:e2e -- --project=${{ matrix.browser }}
+        env:
+          SQUARE_ACCESS_TOKEN: ${{ secrets.SQUARE_SANDBOX_ACCESS_TOKEN }}
+          SQUARE_LOCATION_ID: ${{ secrets.SQUARE_SANDBOX_LOCATION_ID }}
+          SQUARE_WEBHOOK_SIGNATURE_KEY: ${{ secrets.SQUARE_WEBHOOK_SIGNATURE_KEY }}
+          PLAYWRIGHT_BASE_URL: 'http://localhost:3000'
+
+      - name: Upload E2E test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-test-results-${{ matrix.browser }}
+          path: |
+            test-results/
+          retention-days: 30
+
+  # Job 5: Performance Tests
+  performance-tests:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    needs: setup
+    if: contains(needs.setup.outputs.test-matrix, 'performance')
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Restore dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: ${{ needs.setup.outputs.cache-key }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup test database
+        run: |
+          PGPASSWORD=test psql -h localhost -U postgres -d test_db -f ./20250801_square_payment_integration.sql
+
+      - name: Run performance tests
+        run: |
+          npm run test:performance -- --reporter=json --reporter=html
+        env:
+          SQUARE_ACCESS_TOKEN: ${{ secrets.SQUARE_SANDBOX_ACCESS_TOKEN }}
+          SQUARE_LOCATION_ID: ${{ secrets.SQUARE_SANDBOX_LOCATION_ID }}
+
+      - name: Upload performance test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-test-results
+          path: |
+            test-results/
+          retention-days: 30
+
+  # Job 6: Security Scan
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Restore dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: ${{ needs.setup.outputs.cache-key }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run security audit
+        run: npm audit --audit-level=moderate
+
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          languages: typescript
+
+  # Job 7: Test Summary
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests, e2e-tests, performance-tests, security-scan]
+    if: always()
+    steps:
+      - name: Download all test artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: test-results
+
+      - name: Generate test summary
+        run: |
+          echo "# Square Payment Integration Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ needs.unit-tests.result }}" = "success" ]; then
+            echo "✅ Unit Tests - PASSED" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.unit-tests.result }}" = "failure" ]; then
+            echo "❌ Unit Tests - FAILED" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.unit-tests.result }}" = "skipped" ]; then
+            echo "⏭️ Unit Tests - SKIPPED" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ "${{ needs.integration-tests.result }}" = "success" ]; then
+            echo "✅ Integration Tests - PASSED" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.integration-tests.result }}" = "failure" ]; then
+            echo "❌ Integration Tests - FAILED" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.integration-tests.result }}" = "skipped" ]; then
+            echo "⏭️ Integration Tests - SKIPPED" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ "${{ needs.e2e-tests.result }}" = "success" ]; then
+            echo "✅ E2E Tests - PASSED" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.e2e-tests.result }}" = "failure" ]; then
+            echo "❌ E2E Tests - FAILED" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.e2e-tests.result }}" = "skipped" ]; then
+            echo "⏭️ E2E Tests - SKIPPED" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ "${{ needs.performance-tests.result }}" = "success" ]; then
+            echo "✅ Performance Tests - PASSED" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.performance-tests.result }}" = "failure" ]; then
+            echo "❌ Performance Tests - FAILED" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.performance-tests.result }}" = "skipped" ]; then
+            echo "⏭️ Performance Tests - SKIPPED" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ "${{ needs.security-scan.result }}" = "success" ]; then
+            echo "✅ Security Scan - PASSED" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.security-scan.result }}" = "failure" ]; then
+            echo "❌ Security Scan - FAILED" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "Test results and coverage reports are available in the workflow artifacts." >> $GITHUB_STEP_SUMMARY
+
+      - name: Notify on failure
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          channel: '#dev-alerts'
+          text: 'Square Payment Integration tests failed in ${{ github.repository }}'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

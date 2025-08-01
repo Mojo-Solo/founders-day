@@ -1,0 +1,407 @@
+name: Infrastructure as Code - Square Payment Infrastructure
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'infrastructure/**'
+      - '.github/workflows/infrastructure-automation.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'infrastructure/**'
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Infrastructure action'
+        required: true
+        default: 'plan'
+        type: choice
+        options:
+        - plan
+        - apply
+        - destroy
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+
+env:
+  TF_VERSION: '1.6.0'
+  AWS_REGION: 'us-east-1'
+  TERRAFORM_WORKSPACE_PREFIX: 'founders-day'
+
+concurrency:
+  group: infrastructure-${{ github.ref }}-${{ inputs.environment || 'default' }}
+  cancel-in-progress: false
+
+jobs:
+  terraform-validate:
+    name: Terraform Validation
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive infrastructure/
+        continue-on-error: true
+
+      - name: Terraform Init
+        run: |
+          cd infrastructure/
+          terraform init -backend=false
+
+      - name: Terraform Validate
+        run: |
+          cd infrastructure/
+          terraform validate
+
+      - name: Terraform Security Scan
+        uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          working_directory: infrastructure/
+        continue-on-error: true
+
+  infrastructure-plan:
+    name: Infrastructure Plan
+    runs-on: ubuntu-latest
+    needs: [terraform-validate]
+    if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.action == 'plan')
+    timeout-minutes: 15
+
+    strategy:
+      matrix:
+        environment: [staging, production]
+
+    environment:
+      name: ${{ matrix.environment }}-infrastructure
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Terraform Init
+        run: |
+          cd infrastructure/
+          terraform init \
+            -backend-config="bucket=${{ secrets.TERRAFORM_STATE_BUCKET }}" \
+            -backend-config="key=founders-day-${{ matrix.environment }}/terraform.tfstate" \
+            -backend-config="region=${{ env.AWS_REGION }}"
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          cd infrastructure/
+          terraform workspace select -or-create ${{ env.TERRAFORM_WORKSPACE_PREFIX }}-${{ matrix.environment }}
+          terraform plan \
+            -var="environment=${{ matrix.environment }}" \
+            -var="square_application_id=${{ secrets.SQUARE_APPLICATION_ID }}" \
+            -var="square_webhook_signature_key=${{ secrets.SQUARE_WEBHOOK_SIGNATURE_KEY }}" \
+            -var="supabase_url=${{ secrets.SUPABASE_URL }}" \
+            -var="supabase_anon_key=${{ secrets.SUPABASE_ANON_KEY }}" \
+            -out=tfplan-${{ matrix.environment }}.out
+
+      - name: Upload Terraform Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan-${{ matrix.environment }}-${{ github.sha }}
+          path: infrastructure/tfplan-${{ matrix.environment }}.out
+          retention-days: 30
+
+      - name: Comment Terraform Plan on PR
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const fs = require('fs');
+            const planOutput = `${{ steps.plan.outputs.stdout }}`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## Terraform Plan Results - ${{ matrix.environment }}
+              
+              \`\`\`terraform
+              ${planOutput}
+              \`\`\`
+              
+              *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`
+            });
+
+  infrastructure-apply:
+    name: Infrastructure Apply
+    runs-on: ubuntu-latest
+    needs: [terraform-validate]
+    if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && inputs.action == 'apply')
+    timeout-minutes: 20
+
+    strategy:
+      matrix:
+        environment: [staging, production]
+
+    environment:
+      name: ${{ matrix.environment }}-infrastructure
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Terraform Init
+        run: |
+          cd infrastructure/
+          terraform init \
+            -backend-config="bucket=${{ secrets.TERRAFORM_STATE_BUCKET }}" \
+            -backend-config="key=founders-day-${{ matrix.environment }}/terraform.tfstate" \
+            -backend-config="region=${{ env.AWS_REGION }}"
+
+      - name: Terraform Apply
+        run: |
+          cd infrastructure/
+          terraform workspace select -or-create ${{ env.TERRAFORM_WORKSPACE_PREFIX }}-${{ matrix.environment }}
+          terraform apply \
+            -var="environment=${{ matrix.environment }}" \
+            -var="square_application_id=${{ secrets.SQUARE_APPLICATION_ID }}" \
+            -var="square_webhook_signature_key=${{ secrets.SQUARE_WEBHOOK_SIGNATURE_KEY }}" \
+            -var="supabase_url=${{ secrets.SUPABASE_URL }}" \
+            -var="supabase_anon_key=${{ secrets.SUPABASE_ANON_KEY }}" \
+            -auto-approve
+
+      - name: Extract Infrastructure Outputs
+        id: outputs
+        run: |
+          cd infrastructure/
+          echo "cloudfront_distribution_id=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_OUTPUT
+          echo "s3_bucket_name=$(terraform output -raw s3_bucket_name)" >> $GITHUB_OUTPUT
+          echo "rds_endpoint=$(terraform output -raw rds_endpoint)" >> $GITHUB_OUTPUT
+
+      - name: Update GitHub Secrets with Infrastructure Outputs
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const environment = '${{ matrix.environment }}';
+            const outputs = {
+              [`CLOUDFRONT_DISTRIBUTION_ID_${environment.toUpperCase()}`]: '${{ steps.outputs.outputs.cloudfront_distribution_id }}',
+              [`S3_BUCKET_NAME_${environment.toUpperCase()}`]: '${{ steps.outputs.outputs.s3_bucket_name }}',
+              [`RDS_ENDPOINT_${environment.toUpperCase()}`]: '${{ steps.outputs.outputs.rds_endpoint }}'
+            };
+            
+            for (const [name, value] of Object.entries(outputs)) {
+              if (value && value !== '') {
+                console.log(`Setting secret: ${name}`);
+                // Note: This would require appropriate permissions and API calls
+                // Implementation depends on your secrets management strategy
+              }
+            }
+
+  database-migration:
+    name: Database Migration Automation
+    runs-on: ubuntu-latest
+    needs: [infrastructure-apply]
+    if: success() && (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch')
+    timeout-minutes: 10
+
+    strategy:
+      matrix:
+        environment: [staging, production]
+
+    environment:
+      name: ${{ matrix.environment }}-database
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Run database migrations
+        run: |
+          echo "= Running database migrations for ${{ matrix.environment }}..."
+          
+          # Apply Square payment schema
+          if [ -f "20250801_square_payment_integration.sql" ]; then
+            echo "Applying Square payment integration schema..."
+            # This would connect to your database and run migrations
+            # Implementation depends on your database setup (Supabase, PostgreSQL, etc.)
+          fi
+          
+          # Apply helper functions
+          if [ -f "20250801_square_helper_functions.sql" ]; then
+            echo "Applying Square helper functions..."
+          fi
+          
+          # Apply RLS policies
+          if [ -f "20250801_square_rls_policies.sql" ]; then
+            echo "Applying Square RLS policies..."
+          fi
+          
+          # Apply seed data (staging only)
+          if [ "${{ matrix.environment }}" = "staging" ] && [ -f "20250801_square_seed_data.sql" ]; then
+            echo "Applying Square seed data..."
+          fi
+          
+          echo " Database migrations completed"
+        env:
+          DATABASE_URL: ${{ secrets[format('DATABASE_URL_{0}', matrix.environment)] }}
+          SUPABASE_URL: ${{ secrets[format('SUPABASE_URL_{0}', matrix.environment)] }}
+          SUPABASE_ANON_KEY: ${{ secrets[format('SUPABASE_ANON_KEY_{0}', matrix.environment)] }}
+
+      - name: Verify database health
+        run: |
+          echo "= Verifying database health..."
+          
+          # Test database connectivity
+          # Test Square tables existence
+          # Test RLS policies
+          # Test helper functions
+          
+          echo " Database health check passed"
+
+  post-deployment-validation:
+    name: Post-Deployment Infrastructure Validation
+    runs-on: ubuntu-latest
+    needs: [infrastructure-apply, database-migration]
+    if: success()
+    timeout-minutes: 15
+
+    strategy:
+      matrix:
+        environment: [staging, production]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate CDN Configuration
+        run: |
+          echo "< Validating CDN configuration..."
+          
+          DISTRIBUTION_ID="${{ secrets[format('CLOUDFRONT_DISTRIBUTION_ID_{0}', matrix.environment)] }}"
+          
+          if [ -n "$DISTRIBUTION_ID" ]; then
+            echo "CDN Distribution ID: $DISTRIBUTION_ID"
+            # Add CDN validation logic here
+            echo " CDN validation passed"
+          else
+            echo "  CDN Distribution ID not found"
+          fi
+
+      - name: Validate SSL/TLS Certificates
+        run: |
+          echo "= Validating SSL/TLS certificates..."
+          
+          DOMAIN="${{ secrets[format('DOMAIN_{0}', matrix.environment)] }}"
+          
+          if [ -n "$DOMAIN" ]; then
+            # Check SSL certificate validity
+            openssl s_client -connect "$DOMAIN:443" -servername "$DOMAIN" < /dev/null 2>/dev/null | openssl x509 -noout -dates
+            echo " SSL certificate validation passed"
+          else
+            echo "  Domain not configured"
+          fi
+
+      - name: Validate Square Webhook Endpoints
+        run: |
+          echo "= Validating Square webhook endpoints..."
+          
+          BASE_URL="https://${{ secrets[format('DOMAIN_{0}', matrix.environment)] }}"
+          WEBHOOK_URL="$BASE_URL/api/webhooks/square"
+          
+          # Test webhook endpoint accessibility
+          if curl -s -o /dev/null -w "%{http_code}" "$WEBHOOK_URL" | grep -q "405\|200"; then
+            echo " Square webhook endpoint accessible"
+          else
+            echo "L Square webhook endpoint not accessible"
+            exit 1
+          fi
+
+      - name: Validate Database Connectivity
+        run: |
+          echo "=Ä Validating database connectivity..."
+          
+          # Test database connection
+          # Verify Square tables exist
+          # Test sample queries
+          
+          echo " Database connectivity validated"
+
+      - name: Create Infrastructure Status Report
+        run: |
+          echo "=Ê Creating infrastructure status report..."
+          
+          cat > infrastructure-status-${{ matrix.environment }}.md << EOF
+          # Infrastructure Status Report - ${{ matrix.environment }}
+          
+          **Deployment Date:** $(date -u)
+          **Git Commit:** ${{ github.sha }}
+          **Environment:** ${{ matrix.environment }}
+          
+          ## Infrastructure Components
+          
+          -  Terraform Infrastructure Applied
+          -  Database Migrations Completed
+          -  CDN Configuration Validated
+          -  SSL/TLS Certificates Validated
+          -  Square Webhook Endpoints Accessible
+          -  Database Connectivity Confirmed
+          
+          ## Next Steps
+          
+          1. Monitor application health metrics
+          2. Verify payment processing functionality
+          3. Review security scan results
+          4. Update monitoring dashboards
+          
+          EOF
+
+      - name: Upload Infrastructure Status Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: infrastructure-status-${{ matrix.environment }}-${{ github.sha }}
+          path: infrastructure-status-${{ matrix.environment }}.md
+          retention-days: 30

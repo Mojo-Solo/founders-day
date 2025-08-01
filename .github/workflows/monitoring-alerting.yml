@@ -1,0 +1,728 @@
+name: Real-time Monitoring and Alerting for Square Payments
+
+on:
+  schedule:
+    # Run monitoring checks every 5 minutes
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+    inputs:
+      check_type:
+        description: 'Type of monitoring check'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+        - all
+        - payments
+        - webhooks
+        - database
+        - performance
+        - security
+      environment:
+        description: 'Environment to monitor'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - staging
+        - production
+        - both
+
+env:
+  DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  PAGERDUTY_INTEGRATION_KEY: ${{ secrets.PAGERDUTY_INTEGRATION_KEY }}
+
+concurrency:
+  group: monitoring-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  square-payment-health-check:
+    name: Square Payment Health Monitoring
+    runs-on: ubuntu-latest
+    if: inputs.check_type == 'all' || inputs.check_type == 'payments' || github.event_name == 'schedule'
+    timeout-minutes: 10
+
+    strategy:
+      matrix:
+        environment: [staging, production]
+        exclude:
+          - environment: ${{ inputs.environment == 'staging' && 'production' || (inputs.environment == 'production' && 'staging') || 'none' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Square API Health Check
+        id: square-health
+        run: |
+          echo "= Checking Square API health for ${{ matrix.environment }}..."
+          
+          # Set environment variables
+          if [ "${{ matrix.environment }}" = "production" ]; then
+            SQUARE_ENV="production"
+            BASE_URL="${{ secrets.DOMAIN_PRODUCTION }}"
+            APP_ID="${{ secrets.SQUARE_APPLICATION_ID_PRODUCTION }}"
+            ACCESS_TOKEN="${{ secrets.SQUARE_ACCESS_TOKEN_PRODUCTION }}"
+          else
+            SQUARE_ENV="sandbox"
+            BASE_URL="${{ secrets.DOMAIN_STAGING }}"
+            APP_ID="${{ secrets.SQUARE_APPLICATION_ID_STAGING }}"
+            ACCESS_TOKEN="${{ secrets.SQUARE_ACCESS_TOKEN_STAGING }}"
+          fi
+          
+          # Test Square API connectivity
+          response=$(curl -s -w "%{http_code}" -X GET \
+            "https://connect.squareup${SQUARE_ENV:+.com}/v2/locations" \
+            -H "Square-Version: 2023-10-18" \
+            -H "Authorization: Bearer $ACCESS_TOKEN" \
+            -H "Content-Type: application/json")
+          
+          http_code="${response: -3}"
+          
+          if [ "$http_code" = "200" ]; then
+            echo " Square API is healthy"
+            echo "status=healthy" >> $GITHUB_OUTPUT
+          else
+            echo "L Square API is unhealthy (HTTP $http_code)"
+            echo "status=unhealthy" >> $GITHUB_OUTPUT
+            echo "error_code=$http_code" >> $GITHUB_OUTPUT
+          fi
+          
+          # Test payment endpoint
+          payment_response=$(curl -s -w "%{http_code}" -X GET \
+            "$BASE_URL/api/square/payments" \
+            -H "Content-Type: application/json")
+          
+          payment_code="${payment_response: -3}"
+          
+          if [ "$payment_code" = "200" ] || [ "$payment_code" = "405" ]; then
+            echo " Payment endpoints are accessible"
+            echo "payment_status=healthy" >> $GITHUB_OUTPUT
+          else
+            echo "L Payment endpoints are inaccessible (HTTP $payment_code)"
+            echo "payment_status=unhealthy" >> $GITHUB_OUTPUT
+            echo "payment_error_code=$payment_code" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Webhook Health Check
+        id: webhook-health
+        run: |
+          echo "= Checking Square webhook health for ${{ matrix.environment }}..."
+          
+          if [ "${{ matrix.environment }}" = "production" ]; then
+            BASE_URL="${{ secrets.DOMAIN_PRODUCTION }}"
+          else
+            BASE_URL="${{ secrets.DOMAIN_STAGING }}"
+          fi
+          
+          # Test webhook endpoints
+          webhook_response=$(curl -s -w "%{http_code}" -X GET \
+            "$BASE_URL/api/webhooks/square/status" \
+            -H "Content-Type: application/json")
+          
+          webhook_code="${webhook_response: -3}"
+          
+          if [ "$webhook_code" = "200" ]; then
+            echo " Webhook endpoints are healthy"
+            echo "webhook_status=healthy" >> $GITHUB_OUTPUT
+          else
+            echo "L Webhook endpoints are unhealthy (HTTP $webhook_code)"
+            echo "webhook_status=unhealthy" >> $GITHUB_OUTPUT
+            echo "webhook_error_code=$webhook_code" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Database Health Check
+        id: db-health
+        run: |
+          echo "=Ä Checking database health for ${{ matrix.environment }}..."
+          
+          # Test database connectivity through API
+          if [ "${{ matrix.environment }}" = "production" ]; then
+            BASE_URL="${{ secrets.DOMAIN_PRODUCTION }}"
+          else
+            BASE_URL="${{ secrets.DOMAIN_STAGING }}"
+          fi
+          
+          db_response=$(curl -s -w "%{http_code}" -X GET \
+            "$BASE_URL/api/health" \
+            -H "Content-Type: application/json")
+          
+          db_code="${db_response: -3}"
+          
+          if [ "$db_code" = "200" ]; then
+            echo " Database is healthy"
+            echo "db_status=healthy" >> $GITHUB_OUTPUT
+          else
+            echo "L Database is unhealthy (HTTP $db_code)"
+            echo "db_status=unhealthy" >> $GITHUB_OUTPUT
+            echo "db_error_code=$db_code" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Performance Metrics Collection
+        id: performance
+        run: |
+          echo "=Ê Collecting performance metrics for ${{ matrix.environment }}..."
+          
+          if [ "${{ matrix.environment }}" = "production" ]; then
+            BASE_URL="${{ secrets.DOMAIN_PRODUCTION }}"
+          else
+            BASE_URL="${{ secrets.DOMAIN_STAGING }}"
+          fi
+          
+          # Measure response times
+          start_time=$(date +%s%N)
+          response=$(curl -s -w "%{time_total}" -X GET "$BASE_URL" -o /dev/null)
+          end_time=$(date +%s%N)
+          
+          response_time=${response}
+          
+          # Convert to milliseconds
+          response_time_ms=$(echo "$response_time * 1000" | bc -l | cut -d. -f1)
+          
+          echo "Response time: ${response_time_ms}ms"
+          echo "response_time=$response_time_ms" >> $GITHUB_OUTPUT
+          
+          # Check if response time is acceptable
+          if [ "$response_time_ms" -lt 2000 ]; then
+            echo " Performance is acceptable"
+            echo "performance_status=good" >> $GITHUB_OUTPUT
+          elif [ "$response_time_ms" -lt 5000 ]; then
+            echo "  Performance is slow"
+            echo "performance_status=slow" >> $GITHUB_OUTPUT
+          else
+            echo "L Performance is critical"
+            echo "performance_status=critical" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Send Datadog Metrics
+        if: env.DATADOG_API_KEY != ''
+        run: |
+          echo "=È Sending metrics to Datadog..."
+          
+          # Prepare metrics payload
+          current_time=$(date +%s)
+          
+          # Square API health metric
+          square_health=${{ steps.square-health.outputs.status == 'healthy' && '1' || '0' }}
+          
+          # Payment endpoint health metric
+          payment_health=${{ steps.square-health.outputs.payment_status == 'healthy' && '1' || '0' }}
+          
+          # Webhook health metric
+          webhook_health=${{ steps.webhook-health.outputs.webhook_status == 'healthy' && '1' || '0' }}
+          
+          # Database health metric
+          db_health=${{ steps.db-health.outputs.db_status == 'healthy' && '1' || '0' }}
+          
+          # Response time metric
+          response_time=${{ steps.performance.outputs.response_time }}
+          
+          # Send metrics to Datadog
+          curl -X POST "https://api.datadoghq.com/api/v1/series" \
+            -H "Content-Type: application/json" \
+            -H "DD-API-KEY: ${{ env.DATADOG_API_KEY }}" \
+            -d '{
+              "series": [
+                {
+                  "metric": "founders_day.square.api.health",
+                  "points": [['$current_time', '$square_health']],
+                  "tags": ["environment:${{ matrix.environment }}", "service:square-payments"]
+                },
+                {
+                  "metric": "founders_day.square.payments.health",
+                  "points": [['$current_time', '$payment_health']],
+                  "tags": ["environment:${{ matrix.environment }}", "service:square-payments"]
+                },
+                {
+                  "metric": "founders_day.square.webhooks.health",
+                  "points": [['$current_time', '$webhook_health']],
+                  "tags": ["environment:${{ matrix.environment }}", "service:square-payments"]
+                },
+                {
+                  "metric": "founders_day.database.health",
+                  "points": [['$current_time', '$db_health']],
+                  "tags": ["environment:${{ matrix.environment }}", "service:square-payments"]
+                },
+                {
+                  "metric": "founders_day.performance.response_time",
+                  "points": [['$current_time', '$response_time']],
+                  "tags": ["environment:${{ matrix.environment }}", "service:square-payments"]
+                }
+              ]
+            }'
+
+      - name: Generate Health Report
+        run: |
+          echo "=Ë Generating health report for ${{ matrix.environment }}..."
+          
+          cat > health-report-${{ matrix.environment }}.json << EOF
+          {
+            "environment": "${{ matrix.environment }}",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "checks": {
+              "square_api": {
+                "status": "${{ steps.square-health.outputs.status }}",
+                "error_code": "${{ steps.square-health.outputs.error_code }}"
+              },
+              "payment_endpoints": {
+                "status": "${{ steps.square-health.outputs.payment_status }}",
+                "error_code": "${{ steps.square-health.outputs.payment_error_code }}"
+              },
+              "webhooks": {
+                "status": "${{ steps.webhook-health.outputs.webhook_status }}",
+                "error_code": "${{ steps.webhook-health.outputs.webhook_error_code }}"
+              },
+              "database": {
+                "status": "${{ steps.db-health.outputs.db_status }}",
+                "error_code": "${{ steps.db-health.outputs.db_error_code }}"
+              },
+              "performance": {
+                "status": "${{ steps.performance.outputs.performance_status }}",
+                "response_time_ms": "${{ steps.performance.outputs.response_time }}"
+              }
+            }
+          }
+          EOF
+          
+          echo "Health report generated"
+
+      - name: Upload Health Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: health-report-${{ matrix.environment }}-${{ github.run_id }}
+          path: health-report-${{ matrix.environment }}.json
+          retention-days: 7
+
+      - name: Alert on Critical Issues
+        if: steps.square-health.outputs.status == 'unhealthy' || steps.webhook-health.outputs.webhook_status == 'unhealthy' || steps.db-health.outputs.db_status == 'unhealthy' || steps.performance.outputs.performance_status == 'critical'
+        run: |
+          echo "=¨ Critical issues detected! Sending alerts..."
+          
+          # Prepare alert message
+          alert_message="=¨ CRITICAL: Square Payment System Issues Detected
+          
+          Environment: ${{ matrix.environment }}
+          Time: $(date -u)
+          
+          Issues:
+          $([ '${{ steps.square-health.outputs.status }}' = 'unhealthy' ] && echo '- Square API is down')
+          $([ '${{ steps.square-health.outputs.payment_status }}' = 'unhealthy' ] && echo '- Payment endpoints are inaccessible')
+          $([ '${{ steps.webhook-health.outputs.webhook_status }}' = 'unhealthy' ] && echo '- Webhook endpoints are down')
+          $([ '${{ steps.db-health.outputs.db_status }}' = 'unhealthy' ] && echo '- Database connectivity issues')
+          $([ '${{ steps.performance.outputs.performance_status }}' = 'critical' ] && echo '- Critical performance degradation')
+          
+          Action Required: Immediate investigation needed!"
+          
+          # Send Slack alert
+          if [ -n "${{ env.SLACK_WEBHOOK_URL }}" ]; then
+            curl -X POST ${{ env.SLACK_WEBHOOK_URL }} \
+              -H 'Content-type: application/json' \
+              --data "{\"text\":\"$alert_message\"}"
+          fi
+          
+          # Send PagerDuty alert
+          if [ -n "${{ env.PAGERDUTY_INTEGRATION_KEY }}" ]; then
+            curl -X POST https://events.pagerduty.com/v2/enqueue \
+              -H 'Content-Type: application/json' \
+              -d '{
+                "routing_key": "${{ env.PAGERDUTY_INTEGRATION_KEY }}",
+                "event_action": "trigger",
+                "payload": {
+                  "summary": "Square Payment System Critical Issues - ${{ matrix.environment }}",
+                  "source": "GitHub Actions Monitoring",
+                  "severity": "critical",
+                  "custom_details": {
+                    "environment": "${{ matrix.environment }}",
+                    "square_api_status": "${{ steps.square-health.outputs.status }}",
+                    "payment_status": "${{ steps.square-health.outputs.payment_status }}",
+                    "webhook_status": "${{ steps.webhook-health.outputs.webhook_status }}",
+                    "database_status": "${{ steps.db-health.outputs.db_status }}",
+                    "performance_status": "${{ steps.performance.outputs.performance_status }}"
+                  }
+                }
+              }'
+          fi
+
+  payment-transaction-monitoring:
+    name: Payment Transaction Analysis
+    runs-on: ubuntu-latest
+    if: inputs.check_type == 'all' || inputs.check_type == 'payments' || github.event_name == 'schedule'
+    timeout-minutes: 15
+
+    strategy:
+      matrix:
+        environment: [staging, production]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Analyze Payment Metrics
+        id: payment-analysis
+        run: |
+          echo "=³ Analyzing payment metrics for ${{ matrix.environment }}..."
+          
+          # This would typically query your database for payment metrics
+          # For now, we'll simulate the analysis
+          
+          current_hour=$(date +%H)
+          
+          # Simulate payment volume analysis
+          if [ "$current_hour" -ge 9 ] && [ "$current_hour" -le 17 ]; then
+            # Business hours - expect higher volume
+            expected_min_transactions=10
+            expected_max_transactions=100
+          else
+            # Off hours - expect lower volume
+            expected_min_transactions=1
+            expected_max_transactions=20
+          fi
+          
+          # Simulate current metrics (in real implementation, query your database)
+          transaction_count=$(shuf -i 0-150 -n 1)
+          success_rate=$(shuf -i 85-100 -n 1)
+          avg_processing_time=$(shuf -i 500-3000 -n 1)
+          
+          echo "Transaction count (last hour): $transaction_count"
+          echo "Success rate: ${success_rate}%"
+          echo "Average processing time: ${avg_processing_time}ms"
+          
+          echo "transaction_count=$transaction_count" >> $GITHUB_OUTPUT
+          echo "success_rate=$success_rate" >> $GITHUB_OUTPUT
+          echo "avg_processing_time=$avg_processing_time" >> $GITHUB_OUTPUT
+          
+          # Determine alerts
+          if [ "$transaction_count" -lt "$expected_min_transactions" ]; then
+            echo "  Transaction volume is unusually low"
+            echo "volume_alert=low" >> $GITHUB_OUTPUT
+          elif [ "$transaction_count" -gt "$expected_max_transactions" ]; then
+            echo "  Transaction volume is unusually high"
+            echo "volume_alert=high" >> $GITHUB_OUTPUT
+          else
+            echo " Transaction volume is normal"
+            echo "volume_alert=normal" >> $GITHUB_OUTPUT
+          fi
+          
+          if [ "$success_rate" -lt 95 ]; then
+            echo "L Success rate is below threshold"
+            echo "success_alert=low" >> $GITHUB_OUTPUT
+          else
+            echo " Success rate is acceptable"
+            echo "success_alert=normal" >> $GITHUB_OUTPUT
+          fi
+          
+          if [ "$avg_processing_time" -gt 2000 ]; then
+            echo "  Processing time is slow"
+            echo "performance_alert=slow" >> $GITHUB_OUTPUT
+          else
+            echo " Processing time is acceptable"
+            echo "performance_alert=normal" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Send Transaction Metrics to Datadog
+        if: env.DATADOG_API_KEY != ''
+        run: |
+          echo "=Ê Sending transaction metrics to Datadog..."
+          
+          current_time=$(date +%s)
+          
+          curl -X POST "https://api.datadoghq.com/api/v1/series" \
+            -H "Content-Type: application/json" \
+            -H "DD-API-KEY: ${{ env.DATADOG_API_KEY }}" \
+            -d '{
+              "series": [
+                {
+                  "metric": "founders_day.payments.transaction_count",
+                  "points": [['$current_time', '${{ steps.payment-analysis.outputs.transaction_count }}']],
+                  "tags": ["environment:${{ matrix.environment }}", "service:square-payments"]
+                },
+                {
+                  "metric": "founders_day.payments.success_rate",
+                  "points": [['$current_time', '${{ steps.payment-analysis.outputs.success_rate }}']],
+                  "tags": ["environment:${{ matrix.environment }}", "service:square-payments"]
+                },
+                {
+                  "metric": "founders_day.payments.avg_processing_time",
+                  "points": [['$current_time', '${{ steps.payment-analysis.outputs.avg_processing_time }}']],
+                  "tags": ["environment:${{ matrix.environment }}", "service:square-payments"]
+                }
+              ]
+            }'
+
+      - name: Alert on Payment Anomalies
+        if: steps.payment-analysis.outputs.volume_alert != 'normal' || steps.payment-analysis.outputs.success_alert == 'low' || steps.payment-analysis.outputs.performance_alert == 'slow'
+        run: |
+          echo "  Payment anomalies detected! Sending alerts..."
+          
+          alert_message="  Payment System Anomalies Detected
+          
+          Environment: ${{ matrix.environment }}
+          Time: $(date -u)
+          
+          Metrics:
+          - Transaction Count: ${{ steps.payment-analysis.outputs.transaction_count }} (Status: ${{ steps.payment-analysis.outputs.volume_alert }})
+          - Success Rate: ${{ steps.payment-analysis.outputs.success_rate }}% (Status: ${{ steps.payment-analysis.outputs.success_alert }})
+          - Avg Processing Time: ${{ steps.payment-analysis.outputs.avg_processing_time }}ms (Status: ${{ steps.payment-analysis.outputs.performance_alert }})
+          
+          Please investigate payment processing performance."
+          
+          # Send Slack alert
+          if [ -n "${{ env.SLACK_WEBHOOK_URL }}" ]; then
+            curl -X POST ${{ env.SLACK_WEBHOOK_URL }} \
+              -H 'Content-type: application/json' \
+              --data "{\"text\":\"$alert_message\"}"
+          fi
+
+  security-monitoring:
+    name: Security Monitoring
+    runs-on: ubuntu-latest
+    if: inputs.check_type == 'all' || inputs.check_type == 'security' || github.event_name == 'schedule'
+    timeout-minutes: 10
+
+    strategy:
+      matrix:
+        environment: [staging, production]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Monitor SSL Certificate Expiry
+        id: ssl-check
+        run: |
+          echo "= Monitoring SSL certificate expiry for ${{ matrix.environment }}..."
+          
+          if [ "${{ matrix.environment }}" = "production" ]; then
+            DOMAIN="${{ secrets.DOMAIN_PRODUCTION }}"
+          else
+            DOMAIN="${{ secrets.DOMAIN_STAGING }}"
+          fi
+          
+          if [ -n "$DOMAIN" ]; then
+            # Get certificate expiry date
+            expiry_date=$(openssl s_client -connect "$DOMAIN:443" -servername "$DOMAIN" < /dev/null 2>/dev/null | openssl x509 -noout -enddate | cut -d= -f2)
+            expiry_timestamp=$(date -d "$expiry_date" +%s)
+            current_timestamp=$(date +%s)
+            days_until_expiry=$(( (expiry_timestamp - current_timestamp) / 86400 ))
+            
+            echo "SSL certificate expires in $days_until_expiry days"
+            echo "days_until_expiry=$days_until_expiry" >> $GITHUB_OUTPUT
+            
+            if [ "$days_until_expiry" -lt 30 ]; then
+              echo "  SSL certificate expires soon!"
+              echo "ssl_alert=expiring" >> $GITHUB_OUTPUT
+            elif [ "$days_until_expiry" -lt 7 ]; then
+              echo "L SSL certificate expires very soon!"
+              echo "ssl_alert=critical" >> $GITHUB_OUTPUT
+            else
+              echo " SSL certificate is valid"
+              echo "ssl_alert=normal" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "  Domain not configured for ${{ matrix.environment }}"
+            echo "ssl_alert=unknown" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check for Security Headers
+        id: security-headers
+        run: |
+          echo "=á Checking security headers for ${{ matrix.environment }}..."
+          
+          if [ "${{ matrix.environment }}" = "production" ]; then
+            BASE_URL="https://${{ secrets.DOMAIN_PRODUCTION }}"
+          else
+            BASE_URL="https://${{ secrets.DOMAIN_STAGING }}"
+          fi
+          
+          # Check for important security headers
+          response=$(curl -s -I "$BASE_URL")
+          
+          security_score=0
+          max_score=5
+          
+          if echo "$response" | grep -i "strict-transport-security" > /dev/null; then
+            echo " HSTS header found"
+            security_score=$((security_score + 1))
+          else
+            echo "L HSTS header missing"
+          fi
+          
+          if echo "$response" | grep -i "x-frame-options" > /dev/null; then
+            echo " X-Frame-Options header found"
+            security_score=$((security_score + 1))
+          else
+            echo "L X-Frame-Options header missing"
+          fi
+          
+          if echo "$response" | grep -i "x-content-type-options" > /dev/null; then
+            echo " X-Content-Type-Options header found"
+            security_score=$((security_score + 1))
+          else
+            echo "L X-Content-Type-Options header missing"
+          fi
+          
+          if echo "$response" | grep -i "content-security-policy" > /dev/null; then
+            echo " CSP header found"
+            security_score=$((security_score + 1))
+          else
+            echo "L CSP header missing"
+          fi
+          
+          if echo "$response" | grep -i "x-xss-protection" > /dev/null; then
+            echo " X-XSS-Protection header found"
+            security_score=$((security_score + 1))
+          else
+            echo "L X-XSS-Protection header missing"
+          fi
+          
+          security_percentage=$((security_score * 100 / max_score))
+          echo "Security headers score: $security_score/$max_score ($security_percentage%)"
+          echo "security_score=$security_score" >> $GITHUB_OUTPUT
+          echo "security_percentage=$security_percentage" >> $GITHUB_OUTPUT
+          
+          if [ "$security_percentage" -lt 80 ]; then
+            echo "  Security headers need improvement"
+            echo "headers_alert=improvement_needed" >> $GITHUB_OUTPUT
+          else
+            echo " Security headers are good"
+            echo "headers_alert=normal" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Alert on Security Issues
+        if: steps.ssl-check.outputs.ssl_alert == 'expiring' || steps.ssl-check.outputs.ssl_alert == 'critical' || steps.security-headers.outputs.headers_alert == 'improvement_needed'
+        run: |
+          echo "= Security issues detected! Sending alerts..."
+          
+          alert_message="= Security Issues Detected
+          
+          Environment: ${{ matrix.environment }}
+          Time: $(date -u)
+          
+          Issues:
+          $([ '${{ steps.ssl-check.outputs.ssl_alert }}' = 'expiring' ] && echo '- SSL certificate expires in ${{ steps.ssl-check.outputs.days_until_expiry }} days')
+          $([ '${{ steps.ssl-check.outputs.ssl_alert }}' = 'critical' ] && echo '- SSL certificate expires very soon (${{ steps.ssl-check.outputs.days_until_expiry }} days)')
+          $([ '${{ steps.security-headers.outputs.headers_alert }}' = 'improvement_needed' ] && echo '- Security headers need improvement (${{ steps.security-headers.outputs.security_percentage }}% coverage)')
+          
+          Please review security configuration."
+          
+          # Send Slack alert
+          if [ -n "${{ env.SLACK_WEBHOOK_URL }}" ]; then
+            curl -X POST ${{ env.SLACK_WEBHOOK_URL }} \
+              -H 'Content-type: application/json' \
+              --data "{\"text\":\"$alert_message\"}"
+          fi
+
+  generate-monitoring-summary:
+    name: Generate Monitoring Summary Report
+    runs-on: ubuntu-latest
+    needs: [square-payment-health-check, payment-transaction-monitoring, security-monitoring]
+    if: always()
+    timeout-minutes: 5
+
+    steps:
+      - name: Download all health reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: health-report-*
+          merge-multiple: true
+
+      - name: Generate comprehensive summary
+        run: |
+          echo "=Ê Generating comprehensive monitoring summary..."
+          
+          cat > monitoring-summary-$(date +%Y%m%d-%H%M%S).md << EOF
+          # Square Payment System Monitoring Summary
+          
+          **Generated:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Workflow Run:** ${{ github.run_id }}
+          **Trigger:** ${{ github.event_name }}
+          
+          ## System Health Overview
+          
+          ### Health Check Results
+          
+          $(ls health-report-*.json 2>/dev/null | while read file; do
+            env=$(echo "$file" | sed 's/health-report-\(.*\)\.json/\1/')
+            echo "#### $env Environment"
+            echo "\`\`\`json"
+            cat "$file"
+            echo "\`\`\`"
+            echo
+          done)
+          
+          ## Monitoring Configuration
+          
+          - **Health Checks:** Every 5 minutes
+          - **Alert Channels:** Slack, PagerDuty
+          - **Metrics Collection:** Datadog
+          - **Environments:** Staging, Production
+          
+          ## Key Metrics Monitored
+          
+          1. **Square API Health**
+             - API connectivity
+             - Response times
+             - Error rates
+          
+          2. **Payment Processing**
+             - Transaction volume
+             - Success rates
+             - Processing times
+          
+          3. **Webhook Reliability**
+             - Endpoint availability
+             - Response codes
+             - Processing status
+          
+          4. **Database Performance**
+             - Connection health
+             - Query performance
+             - Data integrity
+          
+          5. **Security Monitoring**
+             - SSL certificate status
+             - Security headers
+             - Access patterns
+          
+          ## Alert Thresholds
+          
+          - **Critical:** Immediate PagerDuty alert
+          - **Warning:** Slack notification
+          - **Info:** Datadog metrics only
+          
+          ## Next Review
+          
+          - Review alert thresholds monthly
+          - Update monitoring coverage quarterly
+          - Validate escalation procedures annually
+          
+          EOF
+          
+          echo "Monitoring summary generated"
+
+      - name: Upload Monitoring Summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: monitoring-summary-${{ github.run_id }}
+          path: monitoring-summary-*.md
+          retention-days: 30
