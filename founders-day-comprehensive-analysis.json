@@ -1,0 +1,209 @@
+{
+  "project_overview": {
+    "name": "Founders Day Event Management System",
+    "type": "Monorepo",
+    "description": "A comprehensive event management platform with separate admin dashboard and public-facing frontend",
+    "created_date": "2025-07-30"
+  },
+  "architecture": {
+    "structure": "Monorepo with npm workspaces",
+    "applications": [
+      {
+        "name": "founders-day-admin",
+        "type": "Next.js 15.2.4 Application",
+        "port": 3001,
+        "purpose": "Admin dashboard for event management",
+        "features": [
+          "Registration management",
+          "Volunteer coordination",
+          "Financial tracking",
+          "Email campaigns",
+          "QR code check-in",
+          "Content management"
+        ]
+      },
+      {
+        "name": "founders-day-frontend",
+        "type": "Next.js 15.3.3 Application",
+        "port": 3000,
+        "purpose": "Public-facing registration website",
+        "features": [
+          "Event registration",
+          "Payment processing",
+          "Mobile-responsive design",
+          "Offline support",
+          "Search functionality"
+        ]
+      }
+    ],
+    "shared_packages": [
+      {
+        "name": "@founders-day/shared-types",
+        "description": "Shared TypeScript type definitions",
+        "exports": [
+          "registration types",
+          "activity types",
+          "volunteer types",
+          "payment types",
+          "user types"
+        ]
+      }
+    ]
+  },
+  "technology_stack": {
+    "frontend": {
+      "framework": "Next.js 15+",
+      "ui_library": "React 19",
+      "styling": "Tailwind CSS",
+      "component_library": "Radix UI",
+      "state_management": {
+        "admin": "React Hook Form",
+        "frontend": "Tanstack Query v5"
+      },
+      "typescript": "5.3.2 (strict mode)"
+    },
+    "backend": {
+      "database": "Supabase (PostgreSQL)",
+      "authentication": "Supabase Auth",
+      "realtime": "Supabase Realtime",
+      "api": "Next.js API Routes"
+    },
+    "payment_integration": {
+      "primary": "Square Web SDK",
+      "secondary": "Stripe",
+      "environments": ["sandbox", "production"]
+    },
+    "testing": {
+      "unit": "Vitest",
+      "e2e": "Playwright",
+      "bdd": "Cucumber.js",
+      "api_mocking": "MSW",
+      "coverage": "Vitest Coverage"
+    },
+    "monitoring": {
+      "error_tracking": "Sentry",
+      "analytics": "Custom Analytics Engine",
+      "performance": "Web Vitals"
+    }
+  },
+  "development_workflow": {
+    "package_management": "npm workspaces",
+    "build_tools": {
+      "bundler": "Next.js (with Turbopack support)",
+      "transpiler": "TypeScript",
+      "linting": "ESLint",
+      "formatting": "Prettier"
+    },
+    "testing_strategy": {
+      "bdd_tests": {
+        "location": "/features",
+        "profiles": ["smoke", "parallel", "sequential", "ci", "fast", "benchmark"],
+        "parallel_execution": true,
+        "page_object_model": true
+      },
+      "unit_tests": {
+        "framework": "Vitest",
+        "coverage": true,
+        "watch_mode": true
+      },
+      "integration_tests": {
+        "admin_api": true,
+        "database": true,
+        "authentication": true
+      }
+    },
+    "ci_cd": {
+      "platform": "GitHub Actions",
+      "workflows": [
+        "BDD tests",
+        "CI/CD pipeline",
+        "API integration tests",
+        "Production pipeline",
+        "Vercel environment sync"
+      ],
+      "deployment": {
+        "platform": "Vercel",
+        "docker_support": true,
+        "output": "standalone"
+      }
+    }
+  },
+  "code_statistics": {
+    "total_files": 652,
+    "languages": {
+      "typescript": "primary",
+      "tsx": "primary",
+      "javascript": "minimal",
+      "css": "tailwind"
+    },
+    "admin_app": {
+      "files": 463,
+      "estimated_loc": 58123
+    },
+    "frontend_app": {
+      "files": 189,
+      "estimated_loc": 23000
+    }
+  },
+  "security_features": [
+    "CSP headers",
+    "CORS configuration",
+    "Row Level Security (RLS)",
+    "Authentication middleware",
+    "Environment variable validation",
+    "Secure payment processing"
+  ],
+  "performance_optimizations": [
+    "Next.js Image optimization",
+    "Bundle analysis",
+    "Code splitting",
+    "Service worker (offline support)",
+    "Turbopack support",
+    "Standalone output mode"
+  ],
+  "notable_patterns": {
+    "api_structure": "RESTful endpoints in /app/api/",
+    "component_organization": "Feature-based structure",
+    "type_safety": "Cross-app type sharing",
+    "testing": "Comprehensive BDD with Page Object Model",
+    "error_handling": "Centralized error boundaries",
+    "data_fetching": "Server components with streaming"
+  },
+  "integrations": {
+    "supabase": {
+      "features": ["Authentication", "Database", "Realtime", "RLS"],
+      "configuration": "Environment variables"
+    },
+    "payment_providers": {
+      "square": {
+        "sdk": "@square/web-sdk",
+        "environments": ["sandbox", "production"]
+      },
+      "stripe": {
+        "sdk": "@stripe/stripe-js",
+        "publishable_key": true
+      }
+    },
+    "monitoring": {
+      "sentry": "Error tracking",
+      "analytics": "Google Analytics support"
+    }
+  },
+  "development_commands": {
+    "monorepo": {
+      "typecheck": "npm run typecheck",
+      "test_all": "npm run test:all",
+      "bdd_tests": "npm run test:cucumber"
+    },
+    "admin_app": {
+      "dev": "npm run dev (port 3001)",
+      "build": "npm run build",
+      "test": "npm run test"
+    },
+    "frontend_app": {
+      "dev": "npm run dev --turbopack",
+      "build": "npm run build",
+      "test": "npm run test"
+    }
+  }
+}
