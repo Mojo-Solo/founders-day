@@ -13,17 +13,18 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { Client, Environment, CreateCustomerRequest, UpdateCustomerRequest } from 'squareup'
+import { SquareClient, SquareEnvironment } from 'square'
+import type { Square } from 'square'
 import { validateRequest } from '@/lib/auth/jwt'
 import { rateLimitMiddleware } from '@/lib/auth/middleware'
 import logger from '@/lib/monitoring/logger'
 
 // Initialize Square client
-const squareClient = new Client({
-  accessToken: process.env.SQUARE_ACCESS_TOKEN,
+const squareClient = new SquareClient({
+  token: process.env.SQUARE_ACCESS_TOKEN,
   environment: process.env.SQUARE_ENVIRONMENT === 'production' 
-    ? Environment.Production 
-    : Environment.Sandbox,
+    ? SquareEnvironment.Production 
+    : SquareEnvironment.Sandbox,
 })
 
 // Validation schemas
@@ -44,7 +45,7 @@ const createCustomerSchema = z.object({
   companyName: z.string().optional(),
   address: addressSchema.optional(),
   registrationId: z.string().uuid().optional(),
-  metadata: z.record(z.string()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
   idempotencyKey: z.string().optional(),
 })
 
@@ -56,7 +57,7 @@ const updateCustomerSchema = z.object({
   phoneNumber: z.string().optional(),
   companyName: z.string().optional(),
   address: addressSchema.optional(),
-  metadata: z.record(z.string()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 })
 
 /**
@@ -70,14 +71,13 @@ export async function POST(request: NextRequest) {
     // Rate limiting
     const clientIp = request.headers.get('x-forwarded-for') || 'unknown'
     const canProceed = await rateLimitMiddleware(
-      request, 
       `square-customer:${clientIp}`, 
       20, // 20 requests
       10 * 60 * 1000 // per 10 minutes
     )
 
     if (!canProceed) {
-      logger.warn('Square customer creation rate limit exceeded', { clientIp })
+      logger.warn('Square customer creation rate limit exceeded', { metadata: { clientIp } })
       return NextResponse.json(
         { error: 'Rate limit exceeded. Please try again later.' },
         { status: 429 }
@@ -90,9 +90,11 @@ export async function POST(request: NextRequest) {
 
     // Log customer creation attempt
     logger.info('Square customer creation initiated', {
-      email: validatedData.emailAddress,
-      registrationId: validatedData.registrationId,
-      clientIp,
+      metadata: {
+        email: validatedData.emailAddress,
+        registrationId: validatedData.registrationId,
+        clientIp,
+      }
     })
 
     // Generate idempotency key if not provided
@@ -101,16 +103,18 @@ export async function POST(request: NextRequest) {
 
     // Check if customer already exists by email
     try {
-      const searchResult = await squareClient.customersApi.searchCustomers({
-        filter: {
-          emailAddress: {
-            exact: validatedData.emailAddress,
+      const searchResult = await squareClient.customers.search({
+        query: {
+          filter: {
+            emailAddress: {
+              exact: validatedData.emailAddress,
+            },
           },
         },
       })
 
-      if (searchResult.result.customers && searchResult.result.customers.length > 0) {
-        const existingCustomer = searchResult.result.customers[0]
+      if (searchResult.customers && searchResult.customers.length > 0) {
+        const existingCustomer = searchResult.customers[0]
         
         // Update database with existing customer
         const dbResult = await fetch(`${process.env.DATABASE_URL}/rpc/upsert_square_customer`, {
@@ -139,14 +143,18 @@ export async function POST(request: NextRequest) {
 
         if (!dbResult.ok) {
           logger.error('Failed to upsert existing customer in database', {
-            customerId: existingCustomer.id,
-            error: await dbResult.text(),
+            metadata: {
+              customerId: existingCustomer.id,
+              error: await dbResult.text(),
+            }
           })
         }
 
         logger.info('Square customer already exists, returning existing', {
-          customerId: existingCustomer.id,
-          email: validatedData.emailAddress,
+          metadata: {
+            customerId: existingCustomer.id,
+            email: validatedData.emailAddress,
+          }
         })
 
         return NextResponse.json({
@@ -167,12 +175,14 @@ export async function POST(request: NextRequest) {
       }
     } catch (searchError) {
       logger.warn('Customer search failed, proceeding with creation', {
-        error: searchError instanceof Error ? searchError.message : 'Unknown error',
+        metadata: {
+          error: searchError instanceof Error ? searchError.message : 'Unknown error',
+        }
       })
     }
 
     // Prepare customer creation request
-    const customerRequest: CreateCustomerRequest = {
+    const customerRequest: Square.CreateCustomerRequest = {
       idempotencyKey,
       givenName: validatedData.givenName,
       familyName: validatedData.familyName,
@@ -182,12 +192,15 @@ export async function POST(request: NextRequest) {
     // Add optional fields
     if (validatedData.phoneNumber) customerRequest.phoneNumber = validatedData.phoneNumber
     if (validatedData.companyName) customerRequest.companyName = validatedData.companyName
-    if (validatedData.address) customerRequest.address = validatedData.address
+    if (validatedData.address) customerRequest.address = {
+      ...validatedData.address,
+      country: validatedData.address.country as Square.Country
+    }
 
     // Create customer with Square
-    const { result } = await squareClient.customersApi.createCustomer(customerRequest)
+    const result = await squareClient.customers.create(customerRequest)
 
-    if (!result.customer) {
+    if (!result || result.errors || !result.customer) {
       throw new Error('No customer object returned from Square')
     }
 
@@ -220,8 +233,10 @@ export async function POST(request: NextRequest) {
 
     if (!dbResult.ok) {
       logger.error('Failed to store customer in database', {
-        customerId: customer.id,
-        error: await dbResult.text(),
+        metadata: {
+          customerId: customer.id,
+          error: await dbResult.text(),
+        }
       })
       // Continue - customer was successful with Square
     }
@@ -242,18 +257,22 @@ export async function POST(request: NextRequest) {
 
       if (!linkResult.ok) {
         logger.error('Failed to link customer to registration', {
-          customerId: customer.id,
-          registrationId: validatedData.registrationId,
-          error: await linkResult.text(),
+          metadata: {
+            customerId: customer.id,
+            registrationId: validatedData.registrationId,
+            error: await linkResult.text(),
+          }
         })
       }
     }
 
     logger.info('Square customer created successfully', {
-      customerId: customer.id,
-      email: validatedData.emailAddress,
-      registrationId: validatedData.registrationId,
-      duration: Date.now() - startTime,
+      metadata: {
+        customerId: customer.id,
+        email: validatedData.emailAddress,
+        registrationId: validatedData.registrationId,
+        duration: Date.now() - startTime,
+      }
     })
 
     return NextResponse.json({
@@ -274,16 +293,18 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     logger.error('Square customer creation failed', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      requestData,
-      duration: Date.now() - startTime,
+      metadata: {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        requestData,
+        duration: Date.now() - startTime,
+      }
     })
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { 
           error: 'Invalid request data',
-          details: error.errors,
+          details: error.issues,
         },
         { status: 400 }
       )
@@ -329,27 +350,31 @@ export async function PUT(request: NextRequest) {
     const validatedData = updateCustomerSchema.parse(requestData)
 
     logger.info('Square customer update initiated', {
-      customerId: validatedData.customerId,
-      userId: tokenPayload.userId,
+      metadata: {
+        customerId: validatedData.customerId,
+        userId: tokenPayload.userId,
+      }
     })
 
     // Prepare update request
-    const updateRequest: UpdateCustomerRequest = {}
+    const updateRequest: Square.UpdateCustomerRequest = {
+      customerId: validatedData.customerId,
+    }
 
     if (validatedData.givenName) updateRequest.givenName = validatedData.givenName
     if (validatedData.familyName) updateRequest.familyName = validatedData.familyName
     if (validatedData.emailAddress) updateRequest.emailAddress = validatedData.emailAddress
     if (validatedData.phoneNumber) updateRequest.phoneNumber = validatedData.phoneNumber
     if (validatedData.companyName) updateRequest.companyName = validatedData.companyName
-    if (validatedData.address) updateRequest.address = validatedData.address
+    if (validatedData.address) updateRequest.address = {
+      ...validatedData.address,
+      country: validatedData.address.country as Square.Country
+    }
 
     // Update customer with Square
-    const { result } = await squareClient.customersApi.updateCustomer(
-      validatedData.customerId,
-      updateRequest
-    )
+    const result = await squareClient.customers.update(updateRequest)
 
-    if (!result.customer) {
+    if (!result || result.errors || !result.customer) {
       throw new Error('No customer object returned from Square')
     }
 
@@ -382,14 +407,18 @@ export async function PUT(request: NextRequest) {
 
     if (!dbResult.ok) {
       logger.error('Failed to update customer in database', {
-        customerId: customer.id,
-        error: await dbResult.text(),
+        metadata: {
+          customerId: customer.id,
+          error: await dbResult.text(),
+        }
       })
     }
 
     logger.info('Square customer updated successfully', {
-      customerId: customer.id,
-      duration: Date.now() - startTime,
+      metadata: {
+        customerId: customer.id,
+        duration: Date.now() - startTime,
+      }
     })
 
     return NextResponse.json({
@@ -409,16 +438,18 @@ export async function PUT(request: NextRequest) {
 
   } catch (error) {
     logger.error('Square customer update failed', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      requestData,
-      duration: Date.now() - startTime,
+      metadata: {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        requestData,
+        duration: Date.now() - startTime,
+      }
     })
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { 
           error: 'Invalid request data',
-          details: error.errors,
+          details: error.issues,
         },
         { status: 400 }
       )
@@ -492,9 +523,11 @@ export async function GET(request: NextRequest) {
     const customers = await dbResult.json()
 
     logger.info('Square customers queried successfully', {
-      count: customers.length,
-      filters: { customerId, email, registrationId },
-      duration: Date.now() - startTime,
+      metadata: {
+        count: customers.length,
+        filters: { customerId, email, registrationId },
+        duration: Date.now() - startTime,
+      }
     })
 
     return NextResponse.json({
@@ -509,8 +542,10 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     logger.error('Square customers query failed', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      duration: Date.now() - startTime,
+      metadata: {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        duration: Date.now() - startTime,
+      }
     })
 
     return NextResponse.json(
@@ -547,12 +582,14 @@ export async function DELETE(request: NextRequest) {
     }
 
     logger.info('Square customer deletion initiated', {
-      customerId,
-      userId: tokenPayload.userId,
+      metadata: {
+        customerId,
+        userId: tokenPayload.userId,
+      }
     })
 
     // Delete customer from Square
-    await squareClient.customersApi.deleteCustomer(customerId)
+    await squareClient.customers.delete({ customerId })
 
     // Delete customer from database
     const dbResult = await fetch(`${process.env.DATABASE_URL}/rpc/delete_square_customer`, {
@@ -568,14 +605,18 @@ export async function DELETE(request: NextRequest) {
 
     if (!dbResult.ok) {
       logger.error('Failed to delete customer from database', {
-        customerId,
-        error: await dbResult.text(),
+        metadata: {
+          customerId,
+          error: await dbResult.text(),
+        }
       })
     }
 
     logger.info('Square customer deleted successfully', {
-      customerId,
-      duration: Date.now() - startTime,
+      metadata: {
+        customerId,
+        duration: Date.now() - startTime,
+      }
     })
 
     return NextResponse.json({
@@ -585,8 +626,10 @@ export async function DELETE(request: NextRequest) {
 
   } catch (error) {
     logger.error('Square customer deletion failed', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      duration: Date.now() - startTime,
+      metadata: {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        duration: Date.now() - startTime,
+      }
     })
 
     if (error && typeof error === 'object' && 'result' in error) {

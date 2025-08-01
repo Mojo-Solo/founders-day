@@ -17,9 +17,9 @@ import logger from '../../../../../lib/monitoring/logger'
  * Customer webhook event types and their priorities
  */
 const CUSTOMER_EVENT_PRIORITIES = {
-  'customer.created': WebhookPriority.MEDIUM,
-  'customer.updated': WebhookPriority.MEDIUM,
-  'customer.deleted': WebhookPriority.MEDIUM,
+  'customer.created': WebhookPriority.NORMAL,
+  'customer.updated': WebhookPriority.NORMAL,
+  'customer.deleted': WebhookPriority.NORMAL,
   'customer.card.created': WebhookPriority.LOW,
   'customer.card.updated': WebhookPriority.LOW,
   'customer.card.deleted': WebhookPriority.LOW,

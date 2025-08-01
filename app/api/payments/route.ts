@@ -49,7 +49,7 @@ const paymentRequestSchema = z.object({
   
   // Legacy compatibility
   paymentType: z.enum(['registration', 'donation', 'banquet', 'hotel']).default('registration'),
-  metadata: z.record(z.string()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
   
   // Idempotency
   idempotencyKey: z.string().optional(),
@@ -66,14 +66,13 @@ export async function POST(request: NextRequest) {
     // Rate limiting
     const clientIp = request.headers.get('x-forwarded-for') || 'unknown'
     const canProceed = await rateLimitMiddleware(
-      request, 
       `unified-payment:${clientIp}`, 
       5, // 5 requests
       5 * 60 * 1000 // per 5 minutes
     )
 
     if (!canProceed) {
-      logger.warn('Unified payment rate limit exceeded', { clientIp })
+      logger.warn('Unified payment rate limit exceeded', { metadata: { clientIp } })
       return NextResponse.json(
         { error: 'Rate limit exceeded. Please try again later.' },
         { status: 429 }
@@ -86,11 +85,13 @@ export async function POST(request: NextRequest) {
 
     // Log payment attempt
     logger.info('Unified payment processing initiated', {
-      registrationId: validatedData.registrationId,
-      amount: validatedData.amount,
-      paymentType: validatedData.paymentType,
-      email: validatedData.registrationData.email,
-      clientIp,
+      metadata: {
+        registrationId: validatedData.registrationId,
+        amount: validatedData.amount,
+        paymentType: validatedData.paymentType,
+        email: validatedData.registrationData.email,
+        clientIp,
+      }
     })
 
     // Generate idempotency key if not provided
@@ -125,8 +126,10 @@ export async function POST(request: NextRequest) {
 
       if (!customerResult.success) {
         logger.warn('Customer creation failed, continuing with payment', {
-          error: customerResult.error,
-          registrationId: validatedData.registrationId,
+          metadata: {
+            error: customerResult.error,
+            registrationId: validatedData.registrationId,
+          }
         })
       }
     }
@@ -178,12 +181,14 @@ export async function POST(request: NextRequest) {
 
     // Log successful processing
     logger.info('Unified payment processed successfully', {
-      registrationId: validatedData.registrationId,
-      paymentId: paymentResult.payment!.id,
-      customerId: customerResult?.customer?.id,
-      amount: validatedData.amount,
-      status: paymentResult.payment!.status,
-      duration: Date.now() - startTime,
+      metadata: {
+        registrationId: validatedData.registrationId,
+        paymentId: paymentResult.payment!.id,
+        customerId: customerResult?.customer?.id,
+        amount: validatedData.amount,
+        status: paymentResult.payment!.status,
+        duration: Date.now() - startTime,
+      }
     })
 
     // Return unified response
@@ -205,9 +210,11 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     // Log error
     logger.error('Unified payment processing failed', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      requestData,
-      duration: Date.now() - startTime,
+      metadata: {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        requestData,
+        duration: Date.now() - startTime,
+      }
     })
 
     // Handle validation errors
@@ -215,7 +222,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           error: 'Invalid request data',
-          details: error.errors,
+          details: error.issues,
         },
         { status: 400 }
       )
@@ -269,8 +276,10 @@ async function createOrUpdateRegistration(
 
   } catch (error) {
     logger.error('Registration creation/update failed', {
-      registrationId,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      metadata: {
+        registrationId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      }
     })
 
     return {
@@ -304,15 +313,19 @@ async function updateRegistrationStatus(
     }
 
     logger.info('Registration status updated', {
-      registrationId,
-      status,
+      metadata: {
+        registrationId,
+        status,
+      }
     })
 
   } catch (error) {
     logger.error('Registration status update failed', {
-      registrationId,
-      status,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      metadata: {
+        registrationId,
+        status,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      }
     })
   }
 }
@@ -345,17 +358,21 @@ async function updateRegistrationWithPayment(
     }
 
     logger.info('Registration linked to payment', {
-      registrationId,
-      paymentId,
-      paymentStatus,
-      customerId,
+      metadata: {
+        registrationId,
+        paymentId,
+        paymentStatus,
+        customerId,
+      }
     })
 
   } catch (error) {
     logger.error('Registration payment linking failed', {
-      registrationId,
-      paymentId,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      metadata: {
+        registrationId,
+        paymentId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      }
     })
   }
 }
@@ -379,16 +396,20 @@ async function handleSuccessfulPayment(
 
     // Log successful completion
     logger.info('Post-payment processing completed', {
-      registrationId,
-      paymentId: payment.id,
-      email: registrationData.email,
+      metadata: {
+        registrationId,
+        paymentId: payment.id,
+        email: registrationData.email,
+      }
     })
 
   } catch (error) {
     logger.error('Post-payment processing failed', {
-      registrationId,
-      paymentId: payment.id,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      metadata: {
+        registrationId,
+        paymentId: payment.id,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      }
     })
   }
 }
@@ -403,12 +424,14 @@ async function sendConfirmationEmail(
     // This would integrate with your email service
     // For now, just log the action
     logger.info('Confirmation email would be sent', {
-      email,
-      firstName,
-      registrationId,
-      paymentId: payment.id,
-      amount: payment.amount,
-      receiptUrl: payment.receiptUrl,
+      metadata: {
+        email,
+        firstName,
+        registrationId,
+        paymentId: payment.id,
+        amount: payment.amount,
+        receiptUrl: payment.receiptUrl,
+      }
     })
 
     // TODO: Integrate with actual email service
@@ -422,10 +445,12 @@ async function sendConfirmationEmail(
 
   } catch (error) {
     logger.error('Confirmation email sending failed', {
-      email,
-      registrationId,
-      paymentId: payment.id,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      metadata: {
+        email,
+        registrationId,
+        paymentId: payment.id,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      }
     })
   }
 }
@@ -465,7 +490,9 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     logger.error('Payment status query failed', {
-      error: error instanceof Error ? error.message : 'Unknown error',
+      metadata: {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      }
     })
 
     return NextResponse.json(

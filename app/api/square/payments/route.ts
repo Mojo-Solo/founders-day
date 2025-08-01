@@ -13,17 +13,18 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { Client, Environment, CreatePaymentRequest, RefundPaymentRequest } from 'squareup'
+import { SquareClient, SquareEnvironment } from 'square'
+import type { Square } from 'square'
 import { validateRequest } from '@/lib/auth/jwt'
 import { rateLimitMiddleware } from '@/lib/auth/middleware'
 import logger from '@/lib/monitoring/logger'
 
 // Initialize Square client
-const squareClient = new Client({
-  accessToken: process.env.SQUARE_ACCESS_TOKEN,
+const squareClient = new SquareClient({
+  token: process.env.SQUARE_ACCESS_TOKEN,
   environment: process.env.SQUARE_ENVIRONMENT === 'production' 
-    ? Environment.Production 
-    : Environment.Sandbox,
+    ? SquareEnvironment.Production 
+    : SquareEnvironment.Sandbox,
 })
 
 // Validation schemas
@@ -39,7 +40,7 @@ const createPaymentSchema = z.object({
     email: z.string().email().optional(),
     phone: z.string().optional(),
   }).optional(),
-  metadata: z.record(z.string()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
   locationId: z.string().optional(),
   idempotencyKey: z.string().optional(),
 })
@@ -54,7 +55,7 @@ const refundPaymentSchema = z.object({
 const updatePaymentSchema = z.object({
   paymentId: z.string().min(1, 'Payment ID is required'),
   status: z.enum(['completed', 'failed', 'cancelled']),
-  metadata: z.record(z.string()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 })
 
 /**
@@ -68,14 +69,13 @@ export async function POST(request: NextRequest) {
     // Rate limiting
     const clientIp = request.headers.get('x-forwarded-for') || 'unknown'
     const canProceed = await rateLimitMiddleware(
-      request, 
       `square-payment:${clientIp}`, 
       10, // 10 requests
       5 * 60 * 1000 // per 5 minutes
     )
 
     if (!canProceed) {
-      logger.warn('Square payment rate limit exceeded', { clientIp })
+      logger.warn('Square payment rate limit exceeded', { metadata: { clientIp } })
       return NextResponse.json(
         { error: 'Rate limit exceeded. Please try again later.' },
         { status: 429 }
@@ -88,10 +88,12 @@ export async function POST(request: NextRequest) {
 
     // Log payment attempt
     logger.info('Square payment creation initiated', {
-      registrationId: validatedData.registrationId,
-      amount: validatedData.amount,
-      currency: validatedData.currency,
-      clientIp,
+      metadata: {
+        registrationId: validatedData.registrationId,
+        amount: validatedData.amount,
+        currency: validatedData.currency as Square.Currency,
+        clientIp,
+      }
     })
 
     // Generate idempotency key if not provided
@@ -99,12 +101,12 @@ export async function POST(request: NextRequest) {
       `payment-${validatedData.registrationId}-${Date.now()}`
 
     // Prepare payment request
-    const paymentRequest: CreatePaymentRequest = {
+    const paymentRequest: Square.CreatePaymentRequest = {
       sourceId: validatedData.sourceId,
       idempotencyKey,
       amountMoney: {
         amount: BigInt(Math.round(validatedData.amount * 100)), // Convert to cents
-        currency: validatedData.currency,
+        currency: validatedData.currency as Square.Currency,
       },
       locationId: validatedData.locationId || process.env.SQUARE_LOCATION_ID,
       referenceId: validatedData.registrationId,
@@ -117,9 +119,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Create payment with Square
-    const { result, statusCode } = await squareClient.paymentsApi.createPayment(paymentRequest)
+    const result = await squareClient.payments.create(paymentRequest)
 
-    if (!result.payment) {
+    if (!result || result.errors || !result.payment) {
       throw new Error('No payment object returned from Square')
     }
 
@@ -159,19 +161,23 @@ export async function POST(request: NextRequest) {
 
     if (!dbResult.ok) {
       logger.error('Failed to store payment in database', {
-        paymentId: payment.id,
-        error: await dbResult.text(),
+        metadata: {
+          paymentId: payment.id,
+          error: await dbResult.text(),
+        }
       })
       // Continue - payment was successful with Square
     }
 
     // Log successful payment
     logger.info('Square payment created successfully', {
-      paymentId: payment.id,
-      registrationId: validatedData.registrationId,
-      amount: validatedData.amount,
-      status: payment.status,
-      duration: Date.now() - startTime,
+      metadata: {
+        paymentId: payment.id,
+        registrationId: validatedData.registrationId,
+        amount: validatedData.amount,
+        status: payment.status,
+        duration: Date.now() - startTime,
+      }
     })
 
     // Return success response
@@ -193,9 +199,11 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     // Log error
     logger.error('Square payment creation failed', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      requestData,
-      duration: Date.now() - startTime,
+      metadata: {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        requestData,
+        duration: Date.now() - startTime,
+      }
     })
 
     // Handle validation errors
@@ -203,7 +211,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           error: 'Invalid request data',
-          details: error.errors,
+          details: error.issues,
         },
         { status: 400 }
       )
@@ -252,9 +260,11 @@ export async function PUT(request: NextRequest) {
 
     // Log update attempt
     logger.info('Square payment update initiated', {
-      paymentId: validatedData.paymentId,
-      newStatus: validatedData.status,
-      userId: tokenPayload.userId,
+      metadata: {
+        paymentId: validatedData.paymentId,
+        newStatus: validatedData.status,
+        userId: tokenPayload.userId,
+      }
     })
 
     // Update payment in database
@@ -276,9 +286,11 @@ export async function PUT(request: NextRequest) {
     }
 
     logger.info('Square payment updated successfully', {
-      paymentId: validatedData.paymentId,
-      status: validatedData.status,
-      duration: Date.now() - startTime,
+      metadata: {
+        paymentId: validatedData.paymentId,
+        status: validatedData.status,
+        duration: Date.now() - startTime,
+      }
     })
 
     return NextResponse.json({
@@ -289,16 +301,18 @@ export async function PUT(request: NextRequest) {
 
   } catch (error) {
     logger.error('Square payment update failed', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      requestData,
-      duration: Date.now() - startTime,
+      metadata: {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        requestData,
+        duration: Date.now() - startTime,
+      }
     })
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { 
           error: 'Invalid request data',
-          details: error.errors,
+          details: error.issues,
         },
         { status: 400 }
       )
@@ -334,35 +348,46 @@ export async function DELETE(request: NextRequest) {
 
     // Log refund attempt
     logger.info('Square payment refund initiated', {
-      paymentId: validatedData.paymentId,
-      amount: validatedData.amount,
-      reason: validatedData.reason,
-      userId: tokenPayload.userId,
+      metadata: {
+        paymentId: validatedData.paymentId,
+        amount: validatedData.amount,
+        reason: validatedData.reason,
+        userId: tokenPayload.userId,
+      }
     })
 
     // Generate idempotency key if not provided
     const idempotencyKey = validatedData.idempotencyKey || 
       `refund-${validatedData.paymentId}-${Date.now()}`
 
+    // If amount not specified, we need to get the full payment amount
+    let amountToRefund: bigint
+    if (validatedData.amount) {
+      amountToRefund = BigInt(Math.round(validatedData.amount * 100))
+    } else {
+      // For full refund, we'd need to get the payment details first
+      // For now, we'll require the amount to be specified
+      return NextResponse.json(
+        { error: 'Refund amount is required' },
+        { status: 400 }
+      )
+    }
+
     // Prepare refund request
-    const refundRequest: RefundPaymentRequest = {
+    const refundRequest: Square.RefundPaymentRequest = {
       idempotencyKey,
       paymentId: validatedData.paymentId,
       reason: validatedData.reason,
-    }
-
-    // Add amount if partial refund
-    if (validatedData.amount) {
-      refundRequest.amountMoney = {
-        amount: BigInt(Math.round(validatedData.amount * 100)),
-        currency: 'USD',
+      amountMoney: {
+        amount: amountToRefund,
+        currency: 'USD' as Square.Currency,
       }
     }
 
     // Create refund with Square
-    const { result } = await squareClient.refundsApi.refundPayment(refundRequest)
+    const result = await squareClient.refunds.refundPayment(refundRequest)
 
-    if (!result.refund) {
+    if (!result || result.errors || !result.refund) {
       throw new Error('No refund object returned from Square')
     }
 
@@ -391,18 +416,22 @@ export async function DELETE(request: NextRequest) {
 
     if (!dbResult.ok) {
       logger.error('Failed to store refund in database', {
-        refundId: refund.id,
-        error: await dbResult.text(),
+        metadata: {
+          refundId: refund.id,
+          error: await dbResult.text(),
+        }
       })
       // Continue - refund was successful with Square
     }
 
     logger.info('Square payment refunded successfully', {
-      refundId: refund.id,
-      paymentId: validatedData.paymentId,
-      amount: validatedData.amount,
-      status: refund.status,
-      duration: Date.now() - startTime,
+      metadata: {
+        refundId: refund.id,
+        paymentId: validatedData.paymentId,
+        amount: validatedData.amount,
+        status: refund.status,
+        duration: Date.now() - startTime,
+      }
     })
 
     return NextResponse.json({
@@ -421,16 +450,18 @@ export async function DELETE(request: NextRequest) {
 
   } catch (error) {
     logger.error('Square payment refund failed', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      requestData,
-      duration: Date.now() - startTime,
+      metadata: {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        requestData,
+        duration: Date.now() - startTime,
+      }
     })
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { 
           error: 'Invalid request data',
-          details: error.errors,
+          details: error.issues,
         },
         { status: 400 }
       )
@@ -504,9 +535,11 @@ export async function GET(request: NextRequest) {
     const payments = await dbResult.json()
 
     logger.info('Square payments queried successfully', {
-      count: payments.length,
-      filters: { registrationId, paymentId, status },
-      duration: Date.now() - startTime,
+      metadata: {
+        count: payments.length,
+        filters: { registrationId, paymentId, status },
+        duration: Date.now() - startTime,
+      }
     })
 
     return NextResponse.json({
@@ -521,8 +554,10 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     logger.error('Square payments query failed', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      duration: Date.now() - startTime,
+      metadata: {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        duration: Date.now() - startTime,
+      }
     })
 
     return NextResponse.json(

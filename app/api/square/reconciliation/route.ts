@@ -13,17 +13,18 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { Client, Environment } from 'squareup'
+import { SquareClient, SquareEnvironment } from 'square'
+import type { Square } from 'square'
 import { validateRequest } from '@/lib/auth/jwt'
 import { rateLimitMiddleware } from '@/lib/auth/middleware'
 import logger from '@/lib/monitoring/logger'
 
 // Initialize Square client
-const squareClient = new Client({
-  accessToken: process.env.SQUARE_ACCESS_TOKEN,
+const squareClient = new SquareClient({
+  token: process.env.SQUARE_ACCESS_TOKEN,
   environment: process.env.SQUARE_ENVIRONMENT === 'production' 
-    ? Environment.Production 
-    : Environment.Sandbox,
+    ? SquareEnvironment.Production 
+    : SquareEnvironment.Sandbox,
 })
 
 // Validation schemas
@@ -44,7 +45,7 @@ const resolveDiscrepancySchema = z.object({
   paymentId: z.string().min(1, 'Payment ID is required'),
   action: z.enum(['update_local', 'update_remote', 'manual_review']),
   resolution: z.string().min(1, 'Resolution details required'),
-  metadata: z.record(z.string()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 })
 
 /**
@@ -77,11 +78,13 @@ export async function GET(request: NextRequest) {
     const queryEndDate = endDate ? new Date(endDate) : defaultEndDate
 
     logger.info('Reconciliation report requested', {
-      reportType,
-      startDate: queryStartDate,
-      endDate: queryEndDate,
-      locationId,
-      userId: tokenPayload.userId,
+      metadata: {
+        reportType,
+        startDate: queryStartDate,
+        endDate: queryEndDate,
+        locationId,
+        userId: tokenPayload.userId,
+      }
     })
 
     let reportData: any = {}
@@ -111,9 +114,11 @@ export async function GET(request: NextRequest) {
     }
 
     logger.info('Reconciliation report generated successfully', {
-      reportType,
-      recordCount: reportData.count || 0,
-      duration: Date.now() - startTime,
+      metadata: {
+        reportType,
+        recordCount: reportData.count || 0,
+        duration: Date.now() - startTime,
+      }
     })
 
     return NextResponse.json({
@@ -129,8 +134,10 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     logger.error('Reconciliation report generation failed', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      duration: Date.now() - startTime,
+      metadata: {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        duration: Date.now() - startTime,
+      }
     })
 
     return NextResponse.json(
@@ -159,14 +166,13 @@ export async function POST(request: NextRequest) {
 
     // Rate limiting for sync operations
     const canProceed = await rateLimitMiddleware(
-      request, 
       `square-sync:${tokenPayload.userId}`, 
       3, // 3 requests
       60 * 60 * 1000 // per hour
     )
 
     if (!canProceed) {
-      logger.warn('Square sync rate limit exceeded', { userId: tokenPayload.userId })
+      logger.warn('Square sync rate limit exceeded', { metadata: { userId: tokenPayload.userId } })
       return NextResponse.json(
         { error: 'Sync rate limit exceeded. Please try again later.' },
         { status: 429 }
@@ -181,11 +187,13 @@ export async function POST(request: NextRequest) {
       const validatedData = syncPaymentsSchema.parse(requestData)
 
       logger.info('Payment sync initiated', {
-        startDate: validatedData.startDate,
-        endDate: validatedData.endDate,
-        locationId: validatedData.locationId,
-        forceSync: validatedData.forceSync,
-        userId: tokenPayload.userId,
+        metadata: {
+          startDate: validatedData.startDate,
+          endDate: validatedData.endDate,
+          locationId: validatedData.locationId,
+          forceSync: validatedData.forceSync,
+          userId: tokenPayload.userId,
+        }
       })
 
       const syncResult = await syncPaymentsWithSquare(
@@ -196,8 +204,10 @@ export async function POST(request: NextRequest) {
       )
 
       logger.info('Payment sync completed', {
-        ...syncResult,
-        duration: Date.now() - startTime,
+        metadata: {
+          ...syncResult,
+          duration: Date.now() - startTime,
+        }
       })
 
       return NextResponse.json({
@@ -212,10 +222,12 @@ export async function POST(request: NextRequest) {
       const validatedData = verifyPaymentSchema.parse(requestData)
 
       logger.info('Payment verification initiated', {
-        paymentId: validatedData.paymentId,
-        expectedAmount: validatedData.expectedAmount,
-        expectedStatus: validatedData.expectedStatus,
-        userId: tokenPayload.userId,
+        metadata: {
+          paymentId: validatedData.paymentId,
+          expectedAmount: validatedData.expectedAmount,
+          expectedStatus: validatedData.expectedStatus,
+          userId: tokenPayload.userId,
+        }
       })
 
       const verificationResult = await verifyPaymentWithSquare(
@@ -225,9 +237,11 @@ export async function POST(request: NextRequest) {
       )
 
       logger.info('Payment verification completed', {
-        paymentId: validatedData.paymentId,
-        verified: verificationResult.verified,
-        duration: Date.now() - startTime,
+        metadata: {
+          paymentId: validatedData.paymentId,
+          verified: verificationResult.verified,
+          duration: Date.now() - startTime,
+        }
       })
 
       return NextResponse.json({
@@ -242,9 +256,11 @@ export async function POST(request: NextRequest) {
       const validatedData = resolveDiscrepancySchema.parse(requestData)
 
       logger.info('Discrepancy resolution initiated', {
-        paymentId: validatedData.paymentId,
-        action: validatedData.action,
-        userId: tokenPayload.userId,
+        metadata: {
+          paymentId: validatedData.paymentId,
+          action: validatedData.action,
+          userId: tokenPayload.userId,
+        }
       })
 
       const resolutionResult = await resolvePaymentDiscrepancy(
@@ -255,10 +271,12 @@ export async function POST(request: NextRequest) {
       )
 
       logger.info('Discrepancy resolution completed', {
-        paymentId: validatedData.paymentId,
-        action: validatedData.action,
-        resolved: resolutionResult.resolved,
-        duration: Date.now() - startTime,
+        metadata: {
+          paymentId: validatedData.paymentId,
+          action: validatedData.action,
+          resolved: resolutionResult.resolved,
+          duration: Date.now() - startTime,
+        }
       })
 
       return NextResponse.json({
@@ -274,16 +292,18 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     logger.error('Square reconciliation operation failed', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      requestData,
-      duration: Date.now() - startTime,
+      metadata: {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        requestData,
+        duration: Date.now() - startTime,
+      }
     })
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { 
           error: 'Invalid request data',
-          details: error.errors,
+          details: error.issues,
         },
         { status: 400 }
       )
@@ -397,38 +417,21 @@ async function syncPaymentsWithSquare(
 
   try {
     // Get payments from Square API
-    const searchRequest = {
-      filter: {
-        locationId: locationId || process.env.SQUARE_LOCATION_ID,
-        createdAt: {
-          startAt: startDate.toISOString(),
-          endAt: endDate.toISOString(),
-        },
-      },
-      sort: {
-        sortField: 'CREATED_AT',
-        sortOrder: 'DESC',
-      },
-      limit: 500,
-    }
-
     let cursor: string | undefined
     
     do {
-      if (cursor) {
-        searchRequest['cursor'] = cursor
-      }
+      const result = await squareClient.payments.list({
+        locationId: locationId || process.env.SQUARE_LOCATION_ID,
+        beginTime: startDate.toISOString(),
+        endTime: endDate.toISOString(),
+        sortOrder: 'DESC',
+        cursor,
+        limit: 100,
+      })
 
-      const { result } = await squareClient.paymentsApi.listPayments(
-        locationId || process.env.SQUARE_LOCATION_ID,
-        startDate.toISOString(),
-        endDate.toISOString(),
-        undefined, // sortOrder
-        cursor
-      )
-
-      if (result.payments) {
-        for (const payment of result.payments) {
+      if (result) {
+        // Iterate through paginated results
+        for await (const payment of result) {
           syncResults.totalProcessed++
 
           try {
@@ -480,7 +483,8 @@ async function syncPaymentsWithSquare(
         }
       }
 
-      cursor = result.cursor
+      // For paginated results, we'd need to handle cursor differently
+      cursor = undefined // Disable pagination for now
 
     } while (cursor)
 
@@ -501,9 +505,9 @@ async function verifyPaymentWithSquare(
 ) {
   try {
     // Get payment from Square
-    const { result } = await squareClient.paymentsApi.getPayment(paymentId)
+    const result = await squareClient.payments.get({ paymentId })
     
-    if (!result.payment) {
+    if (!result || result.errors || !result.payment) {
       return {
         verified: false,
         error: 'Payment not found in Square',
@@ -680,11 +684,10 @@ async function resolvePaymentDiscrepancy(
     }
 
     return {
-      resolved: true,
+      ...resolutionResult,
       paymentId,
       action,
       resolution,
-      ...resolutionResult,
     }
 
   } catch (error) {

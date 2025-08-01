@@ -22,13 +22,13 @@ const PAYMENT_EVENT_PRIORITIES = {
   'payment.completed': WebhookPriority.HIGH,
   'payment.failed': WebhookPriority.HIGH,
   'refund.created': WebhookPriority.HIGH,
-  'refund.updated': WebhookPriority.MEDIUM,
-  'refund.completed': WebhookPriority.MEDIUM,
+  'refund.updated': WebhookPriority.NORMAL,
+  'refund.completed': WebhookPriority.NORMAL,
   'refund.failed': WebhookPriority.HIGH,
   'dispute.created': WebhookPriority.CRITICAL,
   'dispute.state_changed': WebhookPriority.CRITICAL,
-  'terminal.checkout.created': WebhookPriority.MEDIUM,
-  'terminal.checkout.updated': WebhookPriority.MEDIUM,
+  'terminal.checkout.created': WebhookPriority.NORMAL,
+  'terminal.checkout.updated': WebhookPriority.NORMAL,
 } as const
 
 /**
