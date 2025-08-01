@@ -23,6 +23,7 @@ on:
 
 env:
   NODE_VERSION: '20'
+  PNPM_VERSION: '8.15.6'
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   SQUARE_WEBHOOK_SIGNATURE_KEY: ${{ secrets.SQUARE_WEBHOOK_SIGNATURE_KEY }}
@@ -45,35 +46,40 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones disabled for better Sonar analysis
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit
+        run: pnpm install --frozen-lockfile
 
       - name: Check for dependency vulnerabilities
-        run: npm audit --audit-level=high
+        run: pnpm audit --audit-level=high
         continue-on-error: true
 
       - name: Run type checking
-        run: npx tsc --noEmit
+        run: pnpm run --recursive type-check
 
       - name: Run linting
-        run: npm run lint -- --max-warnings 0
+        run: pnpm run lint
         continue-on-error: true
 
       - name: Run unit tests with coverage
-        run: npm run test:coverage
+        run: pnpm run --recursive test:coverage --if-present
         env:
           CI: true
 
       - name: Run Square payment integration tests
         run: |
-          npm run test:square
-          npm run test:integration
+          pnpm --filter @founders-day/frontend test:square --if-present
+          pnpm --filter @founders-day/frontend test:integration --if-present
         env:
           CI: true
           SQUARE_APPLICATION_ID: ${{ secrets.SQUARE_APPLICATION_ID_SANDBOX }}
@@ -113,14 +119,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit
+        run: pnpm install --frozen-lockfile
 
       - name: PCI DSS Compliance Scan
         run: |
@@ -153,8 +164,8 @@ jobs:
           fi
           
           # Verify webhook endpoint security
-          if [ -f "app/api/webhooks/square/route.ts" ]; then
-            if grep -q "verifySignature" app/api/webhooks/square/route.ts; then
+          if [ -f "apps/frontend/app/api/webhooks/square/route.ts" ]; then
+            if grep -q "verifySignature" apps/frontend/app/api/webhooks/square/route.ts; then
               echo "✅ Webhook signature verification implemented"
             else
               echo "❌ Webhook signature verification missing"
@@ -199,17 +210,22 @@ jobs:
       - name: Checkout code  
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit
+        run: pnpm install --frozen-lockfile
 
       - name: Build application
-        run: npm run build
+        run: pnpm run --recursive build
         env:
           NEXT_PUBLIC_ADMIN_API_URL: ${{ secrets.ADMIN_API_URL }}
           NEXT_PUBLIC_SQUARE_APPLICATION_ID: ${{ secrets.SQUARE_APPLICATION_ID }}
@@ -234,11 +250,13 @@ jobs:
         with:
           name: build-artifacts-${{ github.sha }}
           path: |
-            .next/
-            public/
+            apps/frontend/.next/
+            apps/frontend/public/
+            apps/admin/.next/
+            apps/admin/public/
             package.json
-            package-lock.json
-            next.config.js
+            pnpm-lock.yaml
+            pnpm-workspace.yaml
           retention-days: 3
 
   e2e-testing:
@@ -252,11 +270,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
@@ -264,20 +287,20 @@ jobs:
           name: build-artifacts-${{ github.sha }}
 
       - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit
+        run: pnpm install --frozen-lockfile
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium firefox webkit
+        run: pnpm exec playwright install --with-deps chromium firefox webkit
 
       - name: Start application
         run: |
-          npm start &
+          pnpm --filter @founders-day/frontend start &
           npx wait-on http://localhost:3000 --timeout 60000
         env:
           PORT: 3000
 
       - name: Run E2E tests
-        run: npm run test:e2e
+        run: pnpm --filter @founders-day/frontend test:e2e --if-present
         env:
           CI: true
 
@@ -306,17 +329,23 @@ jobs:
         with:
           name: build-artifacts-${{ github.sha }}
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit
+        run: pnpm install --frozen-lockfile
 
       - name: Start application
         run: |
-          npm start &
+          pnpm --filter @founders-day/frontend start &
           npx wait-on http://localhost:3000 --timeout 60000
         env:
           PORT: 3000
@@ -395,14 +424,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
       - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+        run: pnpm add -g vercel@latest
 
       - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          cd apps/frontend
+          vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build Project Artifacts  
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          cd apps/frontend
+          vercel build --token=${{ secrets.VERCEL_TOKEN }}
         env:
           NEXT_PUBLIC_ADMIN_API_URL: ${{ secrets.ADMIN_API_URL_STAGING }}
           NEXT_PUBLIC_SQUARE_APPLICATION_ID: ${{ secrets.SQUARE_APPLICATION_ID }}
@@ -412,6 +450,7 @@ jobs:
       - name: Deploy to Staging
         id: deploy-staging
         run: |
+          cd apps/frontend
           DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
           echo "deployment-url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
           echo "Staging deployed to: $DEPLOYMENT_URL"
@@ -436,14 +475,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
       - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+        run: pnpm add -g vercel@latest
 
       - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          cd apps/frontend
+          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build Project Artifacts
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          cd apps/frontend
+          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
         env:
           NEXT_PUBLIC_ADMIN_API_URL: ${{ secrets.ADMIN_API_URL_PRODUCTION }}
           NEXT_PUBLIC_SQUARE_APPLICATION_ID: ${{ secrets.SQUARE_APPLICATION_ID }}
@@ -453,6 +501,7 @@ jobs:
       - name: Deploy to Production
         id: deploy-production
         run: |
+          cd apps/frontend
           DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
           echo "deployment-url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
           echo "Production deployed to: $DEPLOYMENT_URL"

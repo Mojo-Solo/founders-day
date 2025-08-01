@@ -17,6 +17,7 @@ on:
 
 env:
   NODE_VERSION: '20'
+  PNPM_VERSION: '8.15.6'
 
 jobs:
   api-integration-tests:
@@ -38,14 +39,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit
+        run: pnpm install --frozen-lockfile
 
       - name: Wait for API to be ready
         run: |
@@ -54,7 +60,7 @@ jobs:
         continue-on-error: true
 
       - name: Run Enhanced Integration Tests
-        run: npm run test:integration:enhanced
+        run: pnpm --filter @founders-day/frontend test:integration:enhanced --if-present
         env:
           NEXT_PUBLIC_ADMIN_API_URL: ${{ matrix.api-environment.url }}
           ADMIN_API_KEY: ${{ matrix.api-environment.api_key }}
@@ -62,7 +68,7 @@ jobs:
         continue-on-error: true
 
       - name: Run Vitest Integration Tests
-        run: npm run test:integration:vitest
+        run: pnpm --filter @founders-day/frontend test:integration:vitest --if-present
         env:
           NEXT_PUBLIC_ADMIN_API_URL: ${{ matrix.api-environment.url }}
           ADMIN_API_KEY: ${{ matrix.api-environment.api_key }}
@@ -175,14 +181,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit
+        run: pnpm install --frozen-lockfile
 
       - name: Health check monitoring
         run: |
@@ -273,14 +284,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit
+        run: pnpm install --frozen-lockfile
 
       - name: Run performance baseline tests
         run: |

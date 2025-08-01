@@ -29,6 +29,8 @@ on:
         - both
 
 env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '8.15.6'
   DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
   SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
   PAGERDUTY_INTEGRATION_KEY: ${{ secrets.PAGERDUTY_INTEGRATION_KEY }}
@@ -54,14 +56,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit
+        run: pnpm install --frozen-lockfile
 
       - name: Square API Health Check
         id: square-health
@@ -145,7 +152,7 @@ jobs:
       - name: Database Health Check
         id: db-health
         run: |
-          echo "=Ä Checking database health for ${{ matrix.environment }}..."
+          echo "=ï¿½ Checking database health for ${{ matrix.environment }}..."
           
           # Test database connectivity through API
           if [ "${{ matrix.environment }}" = "production" ]; then
@@ -172,7 +179,7 @@ jobs:
       - name: Performance Metrics Collection
         id: performance
         run: |
-          echo "=Ê Collecting performance metrics for ${{ matrix.environment }}..."
+          echo "=ï¿½ Collecting performance metrics for ${{ matrix.environment }}..."
           
           if [ "${{ matrix.environment }}" = "production" ]; then
             BASE_URL="${{ secrets.DOMAIN_PRODUCTION }}"
@@ -198,7 +205,7 @@ jobs:
             echo " Performance is acceptable"
             echo "performance_status=good" >> $GITHUB_OUTPUT
           elif [ "$response_time_ms" -lt 5000 ]; then
-            echo "  Performance is slow"
+            echo "ï¿½ Performance is slow"
             echo "performance_status=slow" >> $GITHUB_OUTPUT
           else
             echo "L Performance is critical"
@@ -208,7 +215,7 @@ jobs:
       - name: Send Datadog Metrics
         if: env.DATADOG_API_KEY != ''
         run: |
-          echo "=È Sending metrics to Datadog..."
+          echo "=ï¿½ Sending metrics to Datadog..."
           
           # Prepare metrics payload
           current_time=$(date +%s)
@@ -264,7 +271,7 @@ jobs:
 
       - name: Generate Health Report
         run: |
-          echo "=Ë Generating health report for ${{ matrix.environment }}..."
+          echo "=ï¿½ Generating health report for ${{ matrix.environment }}..."
           
           cat > health-report-${{ matrix.environment }}.json << EOF
           {
@@ -307,10 +314,10 @@ jobs:
       - name: Alert on Critical Issues
         if: steps.square-health.outputs.status == 'unhealthy' || steps.webhook-health.outputs.webhook_status == 'unhealthy' || steps.db-health.outputs.db_status == 'unhealthy' || steps.performance.outputs.performance_status == 'critical'
         run: |
-          echo "=¨ Critical issues detected! Sending alerts..."
+          echo "=ï¿½ Critical issues detected! Sending alerts..."
           
           # Prepare alert message
-          alert_message="=¨ CRITICAL: Square Payment System Issues Detected
+          alert_message="=ï¿½ CRITICAL: Square Payment System Issues Detected
           
           Environment: ${{ matrix.environment }}
           Time: $(date -u)
@@ -368,19 +375,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit
+        run: pnpm install --frozen-lockfile
 
       - name: Analyze Payment Metrics
         id: payment-analysis
         run: |
-          echo "=³ Analyzing payment metrics for ${{ matrix.environment }}..."
+          echo "=ï¿½ Analyzing payment metrics for ${{ matrix.environment }}..."
           
           # This would typically query your database for payment metrics
           # For now, we'll simulate the analysis
@@ -413,10 +425,10 @@ jobs:
           
           # Determine alerts
           if [ "$transaction_count" -lt "$expected_min_transactions" ]; then
-            echo "  Transaction volume is unusually low"
+            echo "ï¿½ Transaction volume is unusually low"
             echo "volume_alert=low" >> $GITHUB_OUTPUT
           elif [ "$transaction_count" -gt "$expected_max_transactions" ]; then
-            echo "  Transaction volume is unusually high"
+            echo "ï¿½ Transaction volume is unusually high"
             echo "volume_alert=high" >> $GITHUB_OUTPUT
           else
             echo " Transaction volume is normal"
@@ -432,7 +444,7 @@ jobs:
           fi
           
           if [ "$avg_processing_time" -gt 2000 ]; then
-            echo "  Processing time is slow"
+            echo "ï¿½ Processing time is slow"
             echo "performance_alert=slow" >> $GITHUB_OUTPUT
           else
             echo " Processing time is acceptable"
@@ -442,7 +454,7 @@ jobs:
       - name: Send Transaction Metrics to Datadog
         if: env.DATADOG_API_KEY != ''
         run: |
-          echo "=Ê Sending transaction metrics to Datadog..."
+          echo "=ï¿½ Sending transaction metrics to Datadog..."
           
           current_time=$(date +%s)
           
@@ -472,9 +484,9 @@ jobs:
       - name: Alert on Payment Anomalies
         if: steps.payment-analysis.outputs.volume_alert != 'normal' || steps.payment-analysis.outputs.success_alert == 'low' || steps.payment-analysis.outputs.performance_alert == 'slow'
         run: |
-          echo "  Payment anomalies detected! Sending alerts..."
+          echo "ï¿½ Payment anomalies detected! Sending alerts..."
           
-          alert_message="  Payment System Anomalies Detected
+          alert_message="ï¿½ Payment System Anomalies Detected
           
           Environment: ${{ matrix.environment }}
           Time: $(date -u)
@@ -529,7 +541,7 @@ jobs:
             echo "days_until_expiry=$days_until_expiry" >> $GITHUB_OUTPUT
             
             if [ "$days_until_expiry" -lt 30 ]; then
-              echo "  SSL certificate expires soon!"
+              echo "ï¿½ SSL certificate expires soon!"
               echo "ssl_alert=expiring" >> $GITHUB_OUTPUT
             elif [ "$days_until_expiry" -lt 7 ]; then
               echo "L SSL certificate expires very soon!"
@@ -539,14 +551,14 @@ jobs:
               echo "ssl_alert=normal" >> $GITHUB_OUTPUT
             fi
           else
-            echo "  Domain not configured for ${{ matrix.environment }}"
+            echo "ï¿½ Domain not configured for ${{ matrix.environment }}"
             echo "ssl_alert=unknown" >> $GITHUB_OUTPUT
           fi
 
       - name: Check for Security Headers
         id: security-headers
         run: |
-          echo "=á Checking security headers for ${{ matrix.environment }}..."
+          echo "=ï¿½ Checking security headers for ${{ matrix.environment }}..."
           
           if [ "${{ matrix.environment }}" = "production" ]; then
             BASE_URL="https://${{ secrets.DOMAIN_PRODUCTION }}"
@@ -601,7 +613,7 @@ jobs:
           echo "security_percentage=$security_percentage" >> $GITHUB_OUTPUT
           
           if [ "$security_percentage" -lt 80 ]; then
-            echo "  Security headers need improvement"
+            echo "ï¿½ Security headers need improvement"
             echo "headers_alert=improvement_needed" >> $GITHUB_OUTPUT
           else
             echo " Security headers are good"
@@ -648,7 +660,7 @@ jobs:
 
       - name: Generate comprehensive summary
         run: |
-          echo "=Ê Generating comprehensive monitoring summary..."
+          echo "=ï¿½ Generating comprehensive monitoring summary..."
           
           cat > monitoring-summary-$(date +%Y%m%d-%H%M%S).md << EOF
           # Square Payment System Monitoring Summary
