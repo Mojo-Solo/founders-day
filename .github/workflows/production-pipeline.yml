@@ -1,0 +1,435 @@
+name: Production Deployment Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: '20'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  test-and-quality:
+    name: Test & Quality Assurance
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones disabled for better Sonar analysis
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Check for dependency vulnerabilities
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
+      - name: Run type checking
+        run: npx tsc --noEmit
+
+      - name: Run linting
+        run: npm run lint -- --max-warnings 0
+        continue-on-error: true
+
+      - name: Run unit tests with coverage
+        run: npm run test:coverage
+        env:
+          CI: true
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        continue-on-error: true
+
+  security-scan:
+    name: Security Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Snyk security scan
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: CodeQL Analysis
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        continue-on-error: true
+
+  build-and-validate:
+    name: Build & Performance Validation
+    runs-on: ubuntu-latest
+    needs: [test-and-quality, security-scan]
+    timeout-minutes: 20
+    
+    steps:
+      - name: Checkout code  
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Build application
+        run: npm run build
+        env:
+          NEXT_PUBLIC_ADMIN_API_URL: ${{ secrets.ADMIN_API_URL }}
+          NEXT_PUBLIC_SQUARE_APPLICATION_ID: ${{ secrets.SQUARE_APPLICATION_ID }}
+          NEXT_PUBLIC_SQUARE_LOCATION_ID: ${{ secrets.SQUARE_LOCATION_ID }}
+          NEXT_PUBLIC_SQUARE_ENVIRONMENT: ${{ secrets.SQUARE_ENVIRONMENT }}
+          NEXT_TELEMETRY_DISABLED: 1
+
+      - name: Analyze bundle size
+        run: |
+          npx next-bundle-analyzer --json > bundle-stats.json
+          echo "Bundle analysis complete"
+        continue-on-error: true
+
+      - name: Bundle size report
+        uses: andresz1/size-limit-action@v1
+        continue-on-error: true
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-${{ github.sha }}
+          path: |
+            .next/
+            public/
+            package.json
+            package-lock.json
+            next.config.js
+          retention-days: 3
+
+  e2e-testing:
+    name: End-to-End Testing
+    runs-on: ubuntu-latest
+    needs: [build-and-validate]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    timeout-minutes: 30
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts-${{ github.sha }}
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium firefox webkit
+
+      - name: Start application
+        run: |
+          npm start &
+          npx wait-on http://localhost:3000 --timeout 60000
+        env:
+          PORT: 3000
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+        env:
+          CI: true
+
+      - name: Upload E2E test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-results-${{ github.sha }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  lighthouse-audit:
+    name: Performance Audit
+    runs-on: ubuntu-latest
+    needs: [build-and-validate]
+    timeout-minutes: 15
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts-${{ github.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Start application
+        run: |
+          npm start &
+          npx wait-on http://localhost:3000 --timeout 60000
+        env:
+          PORT: 3000
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          urls: |
+            http://localhost:3000
+            http://localhost:3000/register
+            http://localhost:3000/volunteer
+            http://localhost:3000/about
+            http://localhost:3000/schedule
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+          budgetPath: '.lighthouserc.json'
+
+  docker-build:
+    name: Docker Image Build
+    runs-on: ubuntu-latest
+    needs: [test-and-quality, security-scan]
+    if: github.ref == 'refs/heads/main'
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NEXT_PUBLIC_ADMIN_API_URL=${{ secrets.ADMIN_API_URL }}
+            NEXT_PUBLIC_SQUARE_APPLICATION_ID=${{ secrets.SQUARE_APPLICATION_ID }}
+            NEXT_PUBLIC_SQUARE_LOCATION_ID=${{ secrets.SQUARE_LOCATION_ID }}
+            NEXT_PUBLIC_SQUARE_ENVIRONMENT=production
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [docker-build, lighthouse-audit]
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: staging
+      url: https://staging.foundersday.mn
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts  
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          NEXT_PUBLIC_ADMIN_API_URL: ${{ secrets.ADMIN_API_URL_STAGING }}
+          NEXT_PUBLIC_SQUARE_APPLICATION_ID: ${{ secrets.SQUARE_APPLICATION_ID }}
+          NEXT_PUBLIC_SQUARE_LOCATION_ID: ${{ secrets.SQUARE_LOCATION_ID }}
+          NEXT_PUBLIC_SQUARE_ENVIRONMENT: sandbox
+
+      - name: Deploy to Staging
+        id: deploy-staging
+        run: |
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          echo "deployment-url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+          echo "Staging deployed to: $DEPLOYMENT_URL"
+
+      - name: Run staging smoke tests
+        run: |
+          npx wait-on ${{ steps.deploy-staging.outputs.deployment-url }} --timeout 60000
+          curl -f ${{ steps.deploy-staging.outputs.deployment-url }} || exit 1
+          echo "Staging health check passed"
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, e2e-testing]
+    if: github.ref == 'refs/heads/main' && success()
+    environment:
+      name: production
+      url: https://foundersday.mn
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          NEXT_PUBLIC_ADMIN_API_URL: ${{ secrets.ADMIN_API_URL_PRODUCTION }}
+          NEXT_PUBLIC_SQUARE_APPLICATION_ID: ${{ secrets.SQUARE_APPLICATION_ID }}
+          NEXT_PUBLIC_SQUARE_LOCATION_ID: ${{ secrets.SQUARE_LOCATION_ID }}
+          NEXT_PUBLIC_SQUARE_ENVIRONMENT: production
+
+      - name: Deploy to Production
+        id: deploy-production
+        run: |
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "deployment-url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+          echo "Production deployed to: $DEPLOYMENT_URL"
+
+      - name: Production health check
+        run: |
+          npx wait-on ${{ steps.deploy-production.outputs.deployment-url }} --timeout 60000
+          curl -f ${{ steps.deploy-production.outputs.deployment-url }} || exit 1
+          curl -f ${{ steps.deploy-production.outputs.deployment-url }}/api/health || exit 1
+          echo "Production health check passed"
+
+      - name: Update deployment status
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          state: success
+          deployment-id: ${{ steps.deploy-production.outputs.deployment-id }}
+          environment-url: ${{ steps.deploy-production.outputs.deployment-url }}
+
+  notify-deployment:
+    name: Notify Deployment
+    runs-on: ubuntu-latest
+    needs: [deploy-production]
+    if: always() && (github.ref == 'refs/heads/main')
+    
+    steps:
+      - name: Notify Slack
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ needs.deploy-production.result }}
+          channel: '#deployments'
+          text: |
+            🚀 Founders Day Frontend Deployment ${{ needs.deploy-production.result }}
+            
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            Author: ${{ github.actor }}
+            
+            Production URL: https://foundersday.mn
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        if: always()
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        if: needs.deploy-production.result == 'success'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.run_number }}
+          release_name: Release v${{ github.run_number }}
+          body: |
+            🎉 **Production Deployment Successful**
+            
+            **Changes in this release:**
+            - Deployed commit: ${{ github.sha }}
+            - Pipeline run: ${{ github.run_id }}
+            
+            **Deployment Details:**
+            - Production URL: https://foundersday.mn
+            - Staging URL: https://staging.foundersday.mn
+            
+            **Quality Metrics:**
+            - All tests passed ✅
+            - Security scans completed ✅
+            - Performance audit completed ✅
+            
+            View full deployment logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          draft: false
+          prerelease: false

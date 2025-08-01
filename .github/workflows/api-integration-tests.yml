@@ -1,0 +1,374 @@
+name: API Integration Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Run integration tests daily at 6 AM UTC
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    inputs:
+      admin_api_url:
+        description: 'Admin API URL to test against'
+        required: false
+        default: 'https://founders-day-admin-d5dnibu2i-mojosolos-projects.vercel.app'
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  api-integration-tests:
+    name: API Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    strategy:
+      matrix:
+        api-environment:
+          - name: 'Production API'
+            url: 'https://founders-day-admin-d5dnibu2i-mojosolos-projects.vercel.app'
+            api_key: ${{ secrets.ADMIN_API_KEY_PROD }}
+          - name: 'Staging API'
+            url: 'https://staging-admin.foundersday.mn'
+            api_key: ${{ secrets.ADMIN_API_KEY_STAGING }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Wait for API to be ready
+        run: |
+          echo "Waiting for API at ${{ matrix.api-environment.url }} to be ready..."
+          timeout 300 bash -c 'until curl -f ${{ matrix.api-environment.url }}/api/health; do sleep 5; done'
+        continue-on-error: true
+
+      - name: Run Enhanced Integration Tests
+        run: npm run test:integration:enhanced
+        env:
+          NEXT_PUBLIC_ADMIN_API_URL: ${{ matrix.api-environment.url }}
+          ADMIN_API_KEY: ${{ matrix.api-environment.api_key }}
+          FRONTEND_URL: http://localhost:3000
+        continue-on-error: true
+
+      - name: Run Vitest Integration Tests
+        run: npm run test:integration:vitest
+        env:
+          NEXT_PUBLIC_ADMIN_API_URL: ${{ matrix.api-environment.url }}
+          ADMIN_API_KEY: ${{ matrix.api-environment.api_key }}
+        continue-on-error: true
+
+      - name: Upload integration test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-test-report-${{ matrix.api-environment.name }}-${{ github.sha }}
+          path: |
+            api-integration-report.json
+            test-results/
+          retention-days: 7
+
+      - name: Generate test summary
+        if: always()
+        run: |
+          if [ -f api-integration-report.json ]; then
+            echo "## 🧪 API Integration Test Results (${{ matrix.api-environment.name }})" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**API URL:** ${{ matrix.api-environment.url }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            # Extract key metrics from JSON report
+            TOTAL=$(cat api-integration-report.json | jq -r '.summary.total // 0')
+            PASSED=$(cat api-integration-report.json | jq -r '.summary.passed // 0')
+            FAILED=$(cat api-integration-report.json | jq -r '.summary.failed // 0')
+            SUCCESS_RATE=$(cat api-integration-report.json | jq -r '.summary.successRate // 0')
+            DURATION=$(cat api-integration-report.json | jq -r '.summary.duration // 0')
+            
+            echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Total Tests | $TOTAL |" >> $GITHUB_STEP_SUMMARY
+            echo "| Passed | $PASSED |" >> $GITHUB_STEP_SUMMARY
+            echo "| Failed | $FAILED |" >> $GITHUB_STEP_SUMMARY
+            echo "| Success Rate | $SUCCESS_RATE% |" >> $GITHUB_STEP_SUMMARY
+            echo "| Duration | ${DURATION}ms |" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            # Show failed tests if any
+            if [ "$FAILED" -gt 0 ]; then
+              echo "### ❌ Failed Tests" >> $GITHUB_STEP_SUMMARY
+              cat api-integration-report.json | jq -r '.results[] | select(.status != "PASSED") | "- **" + .name + "**: " + (.error // "Unknown error")' >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "## ❌ Integration Test Failed" >> $GITHUB_STEP_SUMMARY
+            echo "No test report generated - check logs for details" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            if (!fs.existsSync('api-integration-report.json')) {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `## 🧪 API Integration Tests (${{ matrix.api-environment.name }})
+                
+                ❌ **Tests failed to run** - check workflow logs for details.
+                
+                API URL: ${{ matrix.api-environment.url }}`
+              });
+              return;
+            }
+            
+            const report = JSON.parse(fs.readFileSync('api-integration-report.json', 'utf8'));
+            const { total, passed, failed, successRate, duration } = report.summary;
+            
+            const status = failed === 0 ? '✅' : '❌';
+            const failedTests = report.results.filter(r => r.status !== 'PASSED');
+            
+            let comment = `## 🧪 API Integration Tests (${{ matrix.api-environment.name }}) ${status}
+            
+            **API URL:** ${{ matrix.api-environment.url }}
+            
+            | Metric | Value |
+            |--------|-------|
+            | Total Tests | ${total} |
+            | Passed | ${passed} |
+            | Failed | ${failed} |
+            | Success Rate | ${successRate.toFixed(1)}% |
+            | Duration | ${duration}ms |`;
+            
+            if (failedTests.length > 0) {
+              comment += '\n\n### ❌ Failed Tests\n';
+              failedTests.forEach(test => {
+                comment += `- **${test.name}**: ${test.error || 'Unknown error'}\n`;
+              });
+            }
+            
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  api-health-monitoring:
+    name: API Health Monitoring
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Health check monitoring
+        run: |
+          echo "Running health check monitoring..."
+          node -e "
+          const https = require('https');
+          
+          const endpoints = [
+            'https://founders-day-admin-d5dnibu2i-mojosolos-projects.vercel.app/api/health',
+            'https://staging-admin.foundersday.mn/api/health'
+          ];
+          
+          Promise.all(endpoints.map(url => 
+            new Promise(resolve => {
+              const req = https.get(url, res => {
+                const startTime = Date.now();
+                res.on('data', () => {});
+                res.on('end', () => {
+                  resolve({
+                    url,
+                    status: res.statusCode,
+                    responseTime: Date.now() - startTime,
+                    success: res.statusCode === 200
+                  });
+                });
+              });
+              
+              req.on('error', err => {
+                resolve({
+                  url,
+                  status: 0,
+                  responseTime: 0,
+                  success: false,
+                  error: err.message
+                });
+              });
+              
+              req.setTimeout(10000, () => {
+                req.destroy();
+                resolve({
+                  url,
+                  status: 0,
+                  responseTime: 10000,
+                  success: false,
+                  error: 'Timeout'
+                });
+              });
+            })
+          )).then(results => {
+            console.log('API Health Check Results:');
+            results.forEach(result => {
+              console.log(\`\${result.url}: \${result.success ? 'OK' : 'FAILED'} (\${result.responseTime}ms)\`);
+              if (!result.success) {
+                console.error(\`  Error: \${result.error || 'HTTP ' + result.status}\`);
+              }
+            });
+            
+            const failedEndpoints = results.filter(r => !r.success);
+            if (failedEndpoints.length > 0) {
+              process.exit(1);
+            }
+          });
+          "
+
+      - name: Send failure notification
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          text: |
+            🚨 **API Health Check Failed**
+            
+            One or more API endpoints are not responding correctly.
+            
+            **Workflow:** ${{ github.workflow }}
+            **Repository:** ${{ github.repository }}
+            **Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+  performance-baseline:
+    name: API Performance Baseline
+    runs-on: ubuntu-latest
+    needs: [api-integration-tests]
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Run performance baseline tests
+        run: |
+          echo "Running API performance baseline tests..."
+          node -e "
+          const https = require('https');
+          
+          const performanceTest = async (url, iterations = 10) => {
+            const times = [];
+            
+            for (let i = 0; i < iterations; i++) {
+              const startTime = Date.now();
+              
+              try {
+                const response = await new Promise((resolve, reject) => {
+                  const req = https.get(url, res => {
+                    res.on('data', () => {});
+                    res.on('end', () => resolve(res));
+                  });
+                  req.on('error', reject);
+                  req.setTimeout(10000, () => {
+                    req.destroy();
+                    reject(new Error('Timeout'));
+                  });
+                });
+                
+                const responseTime = Date.now() - startTime;
+                if (response.statusCode === 200) {
+                  times.push(responseTime);
+                }
+              } catch (error) {
+                console.error(\`Request \${i + 1} failed: \${error.message}\`);
+              }
+            }
+            
+            if (times.length === 0) return null;
+            
+            const avg = times.reduce((a, b) => a + b, 0) / times.length;
+            const min = Math.min(...times);
+            const max = Math.max(...times);
+            const p95 = times.sort((a, b) => a - b)[Math.floor(times.length * 0.95)];
+            
+            return { avg, min, max, p95, samples: times.length };
+          };
+          
+          const endpoints = [
+            'https://founders-day-admin-d5dnibu2i-mojosolos-projects.vercel.app/api/health',
+            'https://founders-day-admin-d5dnibu2i-mojosolos-projects.vercel.app/api/public/content',
+            'https://founders-day-admin-d5dnibu2i-mojosolos-projects.vercel.app/api/schedule'
+          ];
+          
+          (async () => {
+            console.log('API Performance Baseline Tests');
+            console.log('==============================');
+            
+            for (const endpoint of endpoints) {
+              console.log(\`\nTesting: \${endpoint}\`);
+              const stats = await performanceTest(endpoint);
+              
+              if (stats) {
+                console.log(\`Average: \${stats.avg.toFixed(0)}ms\`);
+                console.log(\`Min: \${stats.min}ms\`);
+                console.log(\`Max: \${stats.max}ms\`);
+                console.log(\`95th percentile: \${stats.p95}ms\`);
+                console.log(\`Samples: \${stats.samples}/10\`);
+                
+                // Performance thresholds
+                if (stats.avg > 2000) {
+                  console.error(\`⚠️  Average response time (\${stats.avg.toFixed(0)}ms) exceeds 2000ms threshold\`);
+                }
+                if (stats.p95 > 5000) {
+                  console.error(\`⚠️  95th percentile (\${stats.p95}ms) exceeds 5000ms threshold\`);
+                }
+              } else {
+                console.error('❌ All requests failed');
+              }
+            }
+          })();
+          "
+
+      - name: Store performance metrics
+        run: |
+          echo "Performance baseline completed at $(date)" > performance-baseline.txt
+          echo "See workflow logs for detailed metrics" >> performance-baseline.txt
+
+      - name: Upload performance results
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-baseline-${{ github.sha }}
+          path: performance-baseline.txt
+          retention-days: 30
